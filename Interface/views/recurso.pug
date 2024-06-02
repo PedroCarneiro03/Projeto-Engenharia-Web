@@ -1,0 +1,42 @@
+extends layout
+
+block content
+    .w3-card-4
+        header.w3-container.w3-red
+            h1= title
+        .w3-container
+            .modal(id="display")
+            p
+                strong Tipo: 
+                |  #{item.tipo}
+            p   
+                strong Titulo:
+                |  #{item.titulo}
+            p   
+                strong Subtitulo:
+                |  #{item.subtitulo}
+            p   
+                strong Data de Criacao:
+                |  #{item.dataCriacao}
+            p   
+                strong Data de Registo:
+                |  #{item.dataRegisto}
+            p   
+                strong Autor:
+                |  #{item.autor}
+            .w3-container
+                table.w3-table-all
+                    tr
+                        th Nome do ficheiro
+                        th Mimetype
+                        th Tamanho
+                    each f in item.files
+                        tr(onclick='showImage(\"' + f.filename + '\", \"' + f.mimetype + '\",\"' + item.autor +'\", \"'+ item._id+'\")')
+                            td=f.filename
+                            td=f.mimetype
+                            td=f.size
+
+
+        footer.w3-container.w3-red
+            address Gerado por Pedro Carneiro.
+            a(href="/recursos") Voltar 

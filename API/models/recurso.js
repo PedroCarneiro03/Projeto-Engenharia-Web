@@ -9,7 +9,7 @@ var recursoSchema = new mongoose.Schema({
     dataRegisto:String,
     visibilidade:String,
     autor:String,
-    zip:String
+    ficheiro:[String]
 }, { versionKey: false })
 
 module.exports = mongoose.model('recurso', recursoSchema,"recursos")

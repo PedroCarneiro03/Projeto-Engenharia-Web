@@ -1,10 +1,15 @@
 var express = require('express');
 var router = express.Router();
 var Recurso = require('../controllers/recurso')
+
 var multer = require('multer')
 const upload = multer({ dest: 'uploads/' })
-var fs = require('fs')
-var unzipper = require('unzipper');
+var fs = require('fs-extra')
+const path = require('path');
+const AdmZip = require('adm-zip');
+const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
+const mime = require('mime-types');
 
 /* Listar os Recursos (R) */
 router.get('/', function(req, res) {
@@ -16,49 +21,150 @@ router.get('/', function(req, res) {
 /* Consultar um Recurso (R) */
 router.get('/:id', function(req, res) {
     Recurso.findById(req.params.id)
-        .then(data => res.jsonp(data))
+        .then(recurso => {
+            console.log('Recurso encontrado:', recurso);
+            const dirPath = __dirname + "/../FileStore/Recursos/" + recurso["autor"] + "/" + recurso["_id"] + "/";
+
+            console.log(dirPath)
+            // Verificar se o diretório existe
+            if (!fs.existsSync(dirPath)) {
+            return res.status(404).json({ message: 'Diretório de ficheiros não encontrado' });
+            }
+
+            // Ler os ficheiros no diretório
+            const files = fs.readdirSync(dirPath).map(filename => {
+                const filePath = path.join(dirPath, filename);
+                const stats = fs.statSync(filePath); // Obter estatísticas do ficheiro
+                const content = fs.readFileSync(filePath); // Ler conteúdo do ficheir
+                return {
+                    filename,
+                    mimetype: mime.lookup(filePath), // Obter o mimetype do ficheiro
+                    size: stats.size, // Obter o tamanho do ficheiro em bytes
+                    content // Conteúdo do ficheiro
+                };
+            });
+
+            // Combinar metadados e ficheiros na resposta
+            const response = {
+            ...recurso.toObject(),
+            files
+            };
+            console.log(files)
+
+            res.jsonp(response);
+
+        })
         .catch(erro => res.jsonp(erro))
     });
 
 /* Criar um Recurso (C) */
-router.post('/', upload.single('zip'), function(req, res) {
+router.post('/', upload.single('zip'), async function(req, res) {
 
-    //Verificar integrade do zip com o manifesto
+    
+    const tempDir = path.join(__dirname, '../tmp');
+    await fs.remove(tempDir);
+    await fs.ensureDir(tempDir);
+    let oldPath = __dirname + '/../' + req.file.path 
+    let newPath = tempDir + '/' + req.file.originalname 
 
-    var recurso = req.body
-    recurso.zip = req.file.originalname 
-    Recurso.insert(recurso)
-    .then(data => {
-        fs.mkdir( __dirname + "/../FileStore/Recursos/" + req.body.autor, { recursive: true }, (err) => {
-        if (err) {
-            console.error('Error creating folder:', err);
-        } else {
-            console.log('Folder created successfully: ' + req.body._id);
-            let oldPath = __dirname + '/../' + req.file.path 
-            let newPath = __dirname + '/../FileStore/Recursos/' + req.body.autor + '/' + req.file.originalname 
-
-            fs.rename(oldPath, newPath, function(error){
-                if (error) {
-                    return res.status(500).jsonp({ error: 'Error moving file' });
-                }
-
-                // Extrair o arquivo ZIP para o diretório do autor
-                fs.createReadStream(newPath)
-                .pipe(unzipper.Extract({ path: newPath }))
-                .on('close', () => {
-                    console.log('Files extracted successfully');
-                    res.status(201).jsonp(data);
-                })
-                .on('error', (err) => {
-                    console.error('Error extracting files:', err);
-                    res.status(500).jsonp({ error: 'Error extracting files' });
-                });
-            })
-        }
-        });
-        res.status(201).jsonp(data)
+    await fs.promises.rename(oldPath, newPath, function(error){
+    if(error) throw error
     })
-    .catch(erro => res.jsonp(erro))
+    const zipFilePath = newPath;
+    
+  try {
+    // Ler o arquivo ZIP
+    //console.log(zipFilePath)
+    const zip =  new AdmZip(zipFilePath);
+
+    // Ler o arquivo de manifesto, se existir
+    const manifestEntry = zip.getEntry('manifest.txt');
+    if (!manifestEntry) {
+      throw new Error('Arquivo de manifesto não encontrado no arquivo ZIP.');
+    }
+
+    const manifestContent = zip.readAsText(manifestEntry);
+    const manifest = JSON.parse(manifestContent);
+    //console.log(manifest)
+    // Verificar os arquivos presentes no ZIP em relação aos dados do manifesto
+    const zipEntries = zip.getEntries();
+    const filesInZip = zipEntries.filter(entry => !entry.isDirectory);
+    const filesInManifest = manifest.map(entry => entry.filename);
+
+    const missingFiles = filesInManifest.filter(filename => !filesInZip.some(entry => entry.entryName === filename));
+    if (missingFiles.length > 0) {
+      throw new Error(`Arquivos ausentes no arquivo ZIP: ${missingFiles.join(', ')}`);
+    }
+    const extraFiles = filesInZip.filter(entry => entry.entryName !== 'manifest.txt' && !filesInManifest.includes(entry.entryName) );
+    if (extraFiles.length > 0) {
+    throw new Error(`Arquivos extras no arquivo ZIP: ${extraFiles.map(entry => entry.entryName).join(', ')}`);
+    }
+
+    // Extrair todos os arquivos do ZIP para uma pasta temporária
+    const extractDir = __dirname +  "/../FileStore/Recursos/" + req.body.autor + "/" + req.body["_id"] +"/"
+    await fs.ensureDir(extractDir);
+    zip.extractAllTo(extractDir, true);
+    fs.remove(extractDir + "manifest.txt")
+
+    // Calcular as hashes dos arquivos extraídos e compará-las com as hashes do manifesto
+    for (const fileEntry of filesInZip) {
+        const filename = fileEntry.entryName;
+        if( filename!="manifest.txt"){
+            const filePath = path.join(extractDir, filename);
+
+            const fileContent = await fs.readFile(filePath);
+            const fileHash = crypto.createHash('sha256').update(fileContent).digest('hex');
+
+            const manifestEntry = manifest.find(entry => entry.filename === filename);
+            if (!manifestEntry) {
+                throw new Error(`Hash para ${filename} não encontrada no manifesto.`);
+            }
+
+            if (fileHash !== manifestEntry.hash) {
+                throw new Error(`Hash para ${filename} no manifesto não corresponde.`);
+            }
+        }
+    }
+    const currentDate = new Date();
+
+    // Obter componentes da data atual
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Adiciona um zero à esquerda se for menor que 10
+    const day = String(currentDate.getDate()).padStart(2, '0'); // Adiciona um zero à esquerda se for menor que 10
+
+    // Obter componentes do tempo atual
+    const hours = String(currentDate.getHours()).padStart(2, '0'); // Adiciona um zero à esquerda se for menor que 10
+    const minutes = String(currentDate.getMinutes()).padStart(2, '0'); // Adiciona um zero à esquerda se for menor que 10
+    const seconds = String(currentDate.getSeconds()).padStart(2, '0'); // Adiciona um zero à esquerda se for menor que 10
+
+    // Formatar a data e o tempo como uma string no formato "DD-MM-YYYY HH:MM:SS"
+    const dateTimeString = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+
+    var recurso={
+        _id:req.body["_id"],
+        tipo:req.body["tipo"],
+        titulo:req.body["titulo"],
+        subtitulo:req.body["tipo"],
+        dataCriacao:req.body["dataCriacao"],
+        dataRegisto:dateTimeString,
+        visibilidade:req.body["visibilidade"],
+        autor:req.body["autor"],
+        ficheiro:[]
+    }
+    //Inserir na base de dados
+    for (const entrada of manifest){
+        
+        recurso["ficheiro"].push(entrada["filename"])
+    }
+    Recurso.insert(recurso).then(resposta=>res.jsonp('Ficheiros inseridos com sucesso')).catch(erro=>res.status(409).jsonp(erro))
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).jsonp('Erro ao verificar arquivos e hashes.');
+  } 
+
+
+  
 });
 
 /* Alterar um Recurso  (U) */
