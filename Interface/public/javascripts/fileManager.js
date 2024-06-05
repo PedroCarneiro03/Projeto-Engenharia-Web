@@ -13,7 +13,7 @@ function showImage(fname,ftype,autor,id){
     }
     else{
         var ficheiro= $('<p>' + fname + '</p>')
-        var download = $('<div><a href ="/download/' + fname + '">Download</a></div>')
+        var download = $('<div><a href ="/recursos/download/' + autor + "/" + id + "/"+ fname + '">Download</a></div>')
         $("#display").empty()
         $("#display").append(ficheiro,download)
         $("#display").modal()

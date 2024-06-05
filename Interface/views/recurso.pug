@@ -24,6 +24,8 @@ block content
             p   
                 strong Autor:
                 |  #{item.autor}
+            h1 Download ZIP
+            a(href=`http://localhost:29051/recursos/download/tudo/${item.autor}/${item._id}`) Download
             .w3-container
                 table.w3-table-all
                     tr

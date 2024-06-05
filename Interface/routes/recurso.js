@@ -40,7 +40,25 @@ router.get('/', function(req, res, next) {
 router.get('/add', function(req, res, next) {
     res.render('adicionarRecursos',{title:"Upload de Arquivos"});
 });
-  
+
+
+router.get("/download/tudo/:autor/:id",  function(req,res,next){
+       
+        axios.get(`http://localhost:29050/recursos/download/${req.params.autor}/${req.params.id}`,{responseType: 'arraybuffer'})
+        .then(resposta=> {
+             // Define o caminho do arquivo zip
+            const filePath = __dirname + "/../downloads/" + req.params.id + ".zip";
+
+            // Salva o arquivo zip diretamente no sistema de arquivos
+            fs.writeFileSync(filePath, resposta.data, 'binary');
+            //res.send("Download concluído!");
+            res.download(filePath)
+        })
+        .catch(erro=>{
+            res.render("error",{error: erro, message:"Erro ao dar download ao zip"})
+        })
+})
+
 router.get('/download/:autor/:id/:fname', function(req, res, next) {
     res.download(__dirname + "/../public/FileStore/Recursos/" + req.params.autor + "/" + req.params.id +"/"+ req.params.fname )
 });
@@ -114,7 +132,7 @@ router.post('/', upload.array('files'), async function(req, res, next) {
         await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
 
         // Criar o arquivo ZIP BagIt
-        const zipPath = path.join(__dirname, `../uploads/bag-${_id}.zip`);
+        const zipPath = path.join(__dirname, `../uploads/${_id}.zip`);
         const output = fs.createWriteStream(zipPath);
         const archive = archiver('zip', {
         zlib: { level: 9 }
@@ -131,7 +149,7 @@ router.post('/', upload.array('files'), async function(req, res, next) {
 
             // Criar um objeto FormData para enviar os dados
             const formData = new FormData();
-            formData.append('zip', zipFile, {filename:`bag-${_id}.zip`});
+            formData.append('zip', zipFile, {filename:`${_id}.zip`});
         
             // Adicionar os campos do req.body ao FormData
             for (const [key, value] of Object.entries(req.body)) {

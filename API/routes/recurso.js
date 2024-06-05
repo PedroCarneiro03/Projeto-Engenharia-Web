@@ -10,6 +10,17 @@ const AdmZip = require('adm-zip');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const mime = require('mime-types');
+const archiver = require('archiver');
+
+
+async function calculateFileHash(filePath) {
+    const hash = crypto.createHash('sha256');
+    const input = fs.createReadStream(filePath);
+    for await (const chunk of input) {
+      hash.update(chunk);
+    }
+    return hash.digest('hex');
+  }
 
 /* Listar os Recursos (R) */
 router.get('/', function(req, res) {
@@ -18,8 +29,56 @@ router.get('/', function(req, res) {
         .catch(erro => res.jsonp(erro))
 });
 
+//Download aos ficheiros todos
+router.get("/download/:autor/:id",async function(req,res){
+    
+        //Dar zip a tudo o que esta no dirPath e enviar juntamente com os metadados
+        const directoryPath = __dirname + "/../FileStore/Recursos/" + req.params.autor + "/" + req.params.id + "/";
+        
+        try{
+            const files = await fs.readdir(directoryPath);
+            const manifest = [];
+            for (const file of files) {
+                const filePath = path.join(directoryPath, file);
+                const hash = await calculateFileHash(filePath);
+                manifest.push({
+                filename: file,
+                hash: hash
+            });
+            }
+            
+            const manifestPath = path.join(directoryPath, 'manifest.txt');
+            await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+        
+            res.setHeader('Content-Type', 'application/zip');
+            res.setHeader('Content-Disposition', `attachment; filename=${req.params.id}.zip`);
+            //const outputPath = __dirname + "/../teste/" + req.params.id + ".zip";
+            //const output = fs.createWriteStream(outputPath);
+            const archive = archiver('zip', { zlib: { level: 9 } });
+            archive.pipe(res);
+            //archive.pipe(output);
+            // Adiciona os arquivos ao zip
+            for (const file of files) {
+                archive.file(path.join(directoryPath, file), { name: file });
+            }
+        
+            // Adiciona o manifesto ao zip
+            archive.file(manifestPath, { name: 'manifest.txt' });
+        
+            await archive.finalize();
+
+            // Remove o arquivo manifest.txt
+            await fs.remove(manifestPath);
+        
+
+        } catch (error) {
+            console.error('Error creating zip:', error);
+            res.status(500).send('Server error.');
+        }
+})
+
 /* Consultar um Recurso (R) */
-router.get('/:id', function(req, res) {
+router.get('/:id',  function(req, res) {
     Recurso.findById(req.params.id)
         .then(recurso => {
             console.log('Recurso encontrado:', recurso);
@@ -30,6 +89,7 @@ router.get('/:id', function(req, res) {
             if (!fs.existsSync(dirPath)) {
             return res.status(404).json({ message: 'Diretório de ficheiros não encontrado' });
             }
+            
 
             // Ler os ficheiros no diretório
             const files = fs.readdirSync(dirPath).map(filename => {
@@ -50,12 +110,51 @@ router.get('/:id', function(req, res) {
             files
             };
             console.log(files)
-
             res.jsonp(response);
 
+            /*
+            //Dar zip a tudo o que esta no dirPath e enviar juntamente com os metadados
+            try{
+                const files = await fs.readdir(directoryPath);
+                const manifest = [];
+                for (const file of files) {
+                  const filePath = path.join(directoryPath, file);
+                  const hash = await calculateFileHash(filePath);
+                  manifest.push({
+                    filename: file,
+                    hash: hash
+                });
+                }
+                
+                const manifestPath = path.join(directoryPath, 'manifest.txt');
+                await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+            
+                res.setHeader('Content-Type', 'application/zip');
+                res.setHeader('Content-Disposition', `attachment; filename=${recurso["_id"]}.zip`);
+            
+                const archive = archiver('zip', { zlib: { level: 9 } });
+                archive.pipe(res);
+                // Adiciona os arquivos ao zip
+                for (const file of files) {
+                  archive.file(path.join(directoryPath, file), { name: file });
+                }
+            
+                // Adiciona o manifesto ao zip
+                archive.file(manifestPath, { name: 'manifest.txt' });
+            
+                await archive.finalize();
+                console.log("tou aqui");
+            
+
+            } catch (error) {
+                console.error('Error creating zip:', error);
+                res.status(500).send('Server error.');
+            }*/
         })
         .catch(erro => res.jsonp(erro))
     });
+
+
 
 /* Criar um Recurso (C) */
 router.post('/', upload.single('zip'), async function(req, res) {
