@@ -1,10 +1,10 @@
 [
   {
-    "filename": "settings.xml",
-    "hash": "9b545f182c3b4eced15c83029dbfbc0e078a7c36e46b2d74cc6d8bad64ab1402"
+    "filename": "workflowset.meta",
+    "hash": "d7a36d31e800314ac74ff37e3b6f52a77654888296158c5d2ad3cec63824d208"
   },
   {
-    "filename": "Screenshot from 2024-05-02 19-32-11.png",
-    "hash": "03c47823beb6df84213606f4fa986e3fa42f781d4bd93113a0f06f13bd1ad0a6"
+    "filename": "workflow-metadata.xml",
+    "hash": "abe419a573472c764d4b6ae434cf45a7a5c7234007de905652785361246af0a2"
   }
 ]
