@@ -5,6 +5,7 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var recursosRouter = require('./routes/recurso');
+var postsRouter =  require('./routes/post');
 
 //Conexao a base de dados
 var mongoose = require('mongoose')
@@ -31,6 +32,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/recursos', recursosRouter);
+app.use('/posts', postsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
