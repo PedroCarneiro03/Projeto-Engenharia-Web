@@ -1,10 +1,17 @@
 var mongoose = require("mongoose")
 
+
+var commentSchema = new mongoose.Schema({
+    autor: String,
+    conteudo: String,
+    data: String
+}, { _id: false });
+
 var postSchema = new mongoose.Schema({
     _id: String,
     descricao:String,
     dataRegisto:String,
-    comentarios:[String],
+    comentarios:[commentSchema],
     likes:Number,
     recurso:String
 }, { versionKey: false })

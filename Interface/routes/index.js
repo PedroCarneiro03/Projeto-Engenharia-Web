@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('adicionarRecursos',{title:"Upload de Arquivos"});
+  res.render('paginaPrincipal',{title:"Pagina Principal"});
 });
 
 module.exports = router;

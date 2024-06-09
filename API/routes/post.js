@@ -37,6 +37,8 @@ router.post('/', function(req, res) {
     const dateTimeString = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 
     req.body["dataRegisto"]=dateTimeString
+    req.body["comentarios"]=[]
+    req.body["likes"]=0
     
     POST.insert(req.body)
     .then(data => res.status(201).jsonp(data))

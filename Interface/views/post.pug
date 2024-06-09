@@ -1,0 +1,35 @@
+extends layout
+
+block content
+    .w3-card-4
+        header.w3-container.w3-red
+            h1= title
+        .w3-container
+            p
+                strong Descricao: 
+                |  #{item.descricao}
+            p   
+                strong Data de Registo:
+                |  #{item.dataRegisto}
+            p   
+                strong Likes:
+                |  #{item.likes}
+            a.w3-button.w3-green(href="/recursos/"+item.recurso) Visualizar Recurso
+            a.w3-button.w3-red(href="/posts/like/"+item._id) Like
+            a.w3-button.w3-dark-grey(href="/posts/comentario/escrever/"+item._id) Comentar
+            .w3-container
+                table.w3-table-all
+                    tr
+                        th Autor
+                        th Conteudo
+                        th Data
+                    each c in item.comentarios
+                        tr
+                            td=c.autor
+                            td=c.conteudo
+                            td=c.data
+
+
+        footer.w3-container.w3-red
+            address Gerado por Pedro Carneiro.
+            a(href="/posts") Voltar 
