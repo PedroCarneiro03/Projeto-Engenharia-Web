@@ -59,14 +59,18 @@ router.get("/download/tudo/:autor/:id",  function(req,res,next){
         })
 })
 
+/*
 router.get('/download/:autor/:id/:fname', function(req, res, next) {
     res.download(__dirname + "/../public/FileStore/Recursos/" + req.params.autor + "/" + req.params.id +"/"+ req.params.fname )
-});
+});*/
+
+
 
 router.get('/:id', function(req, res, next) {
 
     axios.get("http://localhost:29050/recursos/" + req.params.id)
         .then(resposta=>{
+            /*
             console.log(resposta.data)
 
             const dirPath = __dirname + "/../public/FileStore/Recursos/" + resposta.data["autor"] + "/" + resposta.data["_id"] + "/"
@@ -80,8 +84,18 @@ router.get('/:id', function(req, res, next) {
                 const contentBuffer = Buffer.from(file.content);
                 fs.writeFileSync(filePath, contentBuffer); // Escreve o conteúdo do ficheiro no diretório
 
-            });
-            res.render('recurso', { title: 'Recurso ' + req.params.id ,item:resposta.data});
+            });*/
+            let media=0
+            
+            if(resposta.data["avaliacoes"].length!=0){
+                let soma=0
+                for(let i=0;i <resposta.data["avaliacoes"].length;i++){
+                    soma+=resposta.data["avaliacoes"][i]["rating"]
+                }
+                media=soma/resposta.data["avaliacoes"].length
+            }
+
+            res.render('recurso', { title: 'Recurso ' + req.params.id ,item:resposta.data,mediaRating:media});
         })
         .catch(erro=>{
         res.render("error",{error: erro, message:"Erro ao recuperar o recurso"})
@@ -194,5 +208,45 @@ router.post('/', upload.array('files'), async function(req, res, next) {
 
 
 });
+
+//avaliar um recurso
+router.post("/avaliar/:id",function(req,res,next){
+    axios.get("http://localhost:29050/recursos/" + req.params.id)
+    .then(resposta=>{
+        //verificar que o user ja avaliou
+        if(resposta!=null){
+            let encontrou = false 
+            for (let i = 0; i < resposta.data["avaliacoes"].length; i++) {
+                // Verifica se o usuario_id do objeto atual é igual ao usuario_id do req.body
+                if (resposta.data["avaliacoes"][i].usuario_id === req.body["usuario_id"]) {
+                    // Altera o valor do campo rating
+                    resposta.data["avaliacoes"][i].rating = req.body["rating"];
+                    // Saia do loop, pois já encontrou e alterou o objeto
+                    encontrou=true
+                    break;
+                }
+            }
+            if(!encontrou){
+                let avaliacao= {
+                    usuario_id:req.body["usuario_id"],
+                    rating:req.body["rating"]
+                }
+                resposta.data["avaliacoes"].push(avaliacao)
+            }
+            console.log(resposta.data)
+            axios.put("http://localhost:29050/recursos/avaliar/" + req.params.id,resposta.data)
+            .then(response=>{
+                //res.render('recurso', { title: 'Recurso ' + req.params.id ,item:response.data});
+                res.redirect("/recursos/"+req.params.id)
+            })
+            .catch(erro=>{
+                res.render("error",{error: erro, message:"Erro ao alterar o recurso"})
+            })
+        }
+    })
+    .catch(erro=>{
+    res.render("error",{error: erro, message:"Erro ao recuperar o recurso"})
+    })
+})
 
 module.exports = router;

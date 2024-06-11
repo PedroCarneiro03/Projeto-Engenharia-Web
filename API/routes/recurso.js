@@ -80,7 +80,11 @@ router.get("/download/:autor/:id",async function(req,res){
 /* Consultar um Recurso (R) */
 router.get('/:id',  function(req, res) {
     Recurso.findById(req.params.id)
+        .then(data => res.jsonp(data))
+        .catch(erro => res.jsonp(erro))
+        /*
         .then(recurso => {
+            
             console.log('Recurso encontrado:', recurso);
             const dirPath = __dirname + "/../FileStore/Recursos/" + recurso["autor"] + "/" + recurso["_id"] + "/";
 
@@ -112,7 +116,7 @@ router.get('/:id',  function(req, res) {
             console.log(files)
             res.jsonp(response);
         })
-        .catch(erro => res.jsonp(erro))
+        .catch(erro => res.jsonp(erro))*/
     });
 
 
@@ -209,7 +213,8 @@ router.post('/', upload.single('zip'), async function(req, res) {
         dataRegisto:dateTimeString,
         visibilidade:req.body["visibilidade"],
         autor:req.body["autor"],
-        ficheiro:[]
+        ficheiro:[],
+        avaliacoes:[]
     }
     //Inserir na base de dados
     for (const entrada of manifest){
@@ -226,6 +231,16 @@ router.post('/', upload.single('zip'), async function(req, res) {
 
   
 });
+
+//alterar  a avaliacao de um recurso
+router.put('/avaliar/:id', function(req, res) {
+
+    console.log(req.body)
+    Recurso.update(req.params.id, req.body)
+        .then(data => res.jsonp(data))
+        .catch(erro => res.jsonp(erro))
+
+})
 
 /* Alterar um Recurso  (U) */
 router.put('/:id', upload.single('zip'), async function(req, res) {
@@ -328,7 +343,8 @@ router.put('/:id', upload.single('zip'), async function(req, res) {
             dataRegisto:dateTimeString,
             visibilidade:req.body["visibilidade"],
             autor:req.body["autor"],
-            ficheiro:[]
+            ficheiro:[],
+            avaliacoes:req.body["avaliacoes"]
         }
         //Inserir na base de dados
         for (const entrada of manifest){
@@ -344,6 +360,7 @@ router.put('/:id', upload.single('zip'), async function(req, res) {
     })
 
 });
+
 
 /* Remover um Recurso (D ) */
 router.delete('/:id', function(req, res) {

@@ -24,21 +24,22 @@ block content
             p   
                 strong Autor:
                 |  #{item.autor}
-            
+            p   
+                strong Rating:
+                .w3-text-yellow
+                    p #{mediaRating} estrelas
             a.w3-button.w3-green(href=`http://localhost:29051/recursos/download/tudo/${item.autor}/${item._id}`) Download ZIP
-            .w3-container
-                table.w3-table-all
-                    tr
-                        th Nome do ficheiro
-                        th Mimetype
-                        th Tamanho
-                    each f in item.files
-                        tr(onclick='showImage(\"' + f.filename + '\", \"' + f.mimetype + '\",\"' + item.autor +'\", \"'+ item._id+'\")')
-                            td=f.filename
-                            td=f.mimetype
-                            td=f.size
+            form(action="/recursos/avaliar/"+item._id,method="post")
+                input(type="radio" name="rating" id="1-stars" value=1)
+                input(type="radio" name="rating" id="2-stars" value=2)
+                input(type="radio" name="rating" id="3-stars" value=3)
+                input(type="radio" name="rating" id="4-stars" value=4)
+                input(type="radio" name="rating" id="5-stars" value=5)
+                input(type="text" name="usuario_id")
+                button.w3-btn.w3-green.w3-mb-2(type='submit') Avaliar
 
 
-        footer.w3-container.w3-red
+
+        footer.w3-container.w3-red  
             address Gerado por Pedro Carneiro.
             a(href="/recursos") Voltar 
