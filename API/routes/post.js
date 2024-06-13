@@ -40,6 +40,8 @@ router.post('/', function(req, res) {
     req.body["comentarios"]=[]
     req.body["likes"]=0
     
+    console.log("Dados recebidos no pedido de adição de post: "+JSON.stringify(req.body)+"\n")
+
     POST.insert(req.body)
     .then(data => res.status(201).jsonp(data))
     .catch(erro => res.jsonp(erro))

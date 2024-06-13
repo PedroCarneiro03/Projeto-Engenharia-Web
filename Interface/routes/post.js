@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var axios= require("axios");
+var { v4: uuidv4 } = require('uuid');
 var multer = require('multer')
 const upload = multer({ dest: 'uploads/' })
 
@@ -18,7 +19,36 @@ router.get('/', function(req, res, next) {
 });
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* GET add post */
+router.get('/add', function(req, res, next) {
+  res.render('addPost', { title: 'Página de adição de posts'});
+});
 
+/* POST add post */
+router.post('/add', function(req, res, next) {
+  // Obter os dados da pagina de registo
+  const {descricao, recurso} = req.body;
+
+  // Gerar um UUID
+  const _id = uuidv4();
+
+  // Adicionar o UUID aos dados do post (O post precisa de um ID)
+  const postData = { _id, descricao, recurso };
+
+  // Validar
+  if (!descricao || !recurso) {
+    console.log("Dados invalidos!");
+    return res.status(400).send('Todos os campos são obrigatorios!');
+  }
+
+  // Chamar a página de sucesso (Enviar post para a API)
+  axios.post('http://localhost:29050/posts', postData)
+    .then(dados => res.send('Post adicionado!'))
+    .catch(e => res.status(500).jsonp({error: e}))
+});
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 router.get('/like/:id', function(req, res, next) {
 
     axios.get("http://localhost:29050/posts/" + req.params.id)

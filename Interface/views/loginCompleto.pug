@@ -1,0 +1,16 @@
+extends layout
+
+block content
+    include componentes/navbar
+    
+    .w3-card-4
+        header.w3-container.w3-green
+            h1= title
+        
+        p Seja bem vindo #{dados.username}!!
+
+        .w3-container
+            a.w3-button.w3-dark-grey(href="/login") Ir para a página principal
+        .w3-container
+        footer.w3-container.w3-red
+            address Grupo NPM Starters

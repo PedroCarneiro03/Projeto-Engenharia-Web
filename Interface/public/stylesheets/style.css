@@ -1,8 +1,128 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+* {
+  margin: 0;
+  padding: 0;
 }
 
-a {
-  color: #00B7FF;
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1; /* Expande o main para ocupar todo o espaço restante */
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+.um-fundo {
+  position: fixed;
+  top: 0;
+  left: -20px;
+  width: 120%;
+  height: 120%;
+  background-image: url('/imagens/um.jpg'); /* Adjust the path to your image */
+  background-size: cover;
+  background-position: center;
+  filter: blur(14px); /* Adjust the blur amount as needed */
+  z-index: -1; /* Ensure the image is behind other content */
+}
+
+
+
+
+
+@font-face {
+  font-family: 'LemonMilk';
+  src: url('/fontes/lemonmilk.otf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.lemonmilk {
+  font-family: 'LemonMilk', sans-serif;
+}
+
+@font-face {
+  font-family: 'Classica';
+  src: url('/fontes/classica.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.classica {
+  font-family: 'Classica', sans-serif;
+}
+
+@font-face {
+  font-family: 'Regular';
+  src: url('/fontes/regular.otf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.regular {
+  font-family: 'Regular', sans-serif;
+}
+
+
+/* Estilo para o header como flex container */
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem; /* Adicione preenchimento conforme necessário */
+}
+
+/* Estilo para a logo no header */
+.header-logo {
+    height: 50px; /* Ajuste a altura conforme necessário */
+    width: auto;
+}
+
+/* Estilo para o header como flex container */
+.header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem; /* Adicione preenchimento conforme necessário */
+}
+
+/* Estilo para o título no header */
+.header-title {
+  margin: 0; /* Remove a margem padrão */
+  flex: 1;
+}
+
+/* Estilo para a logo no header */
+.header-logo {
+  height: 50px; /* Ajuste a altura conforme necessário */
+  width: auto;
+}
+
+/* Estilo para centralizar o conteúdo */
+.caixacentrada {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  width: 60vh;
+}
+
+.arredondado {
+  border-radius: 10px; /* Raio dos cantos arredondados */
+}
+
+.conteudo{
+  margin-top:30px;
+  display: flex;
+  justify-content: center;
 }

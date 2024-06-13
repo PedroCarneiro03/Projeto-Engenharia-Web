@@ -1,0 +1,35 @@
+extends layout
+
+block content
+    .w3-card-4
+        div.w3-bar.w3-black
+            a(href="/", class="w3-bar-item w3-button") Inicio
+            a(href="/registar", class="w3-bar-item w3-button") Registar
+            a(href="/login", class="w3-bar-item w3-button") Login
+
+        header.w3-container.w3-green
+            h1= title
+        
+        p Seja bem vindo #{dados.name} à nossa plataforma de partilha de recursos!
+        p O seu username para efetuar login é: #{dados.username}
+
+        h2 Os seus dados de registo:
+        table.w3-hoverable.w3-green
+            tr
+                th Nome
+                th Username
+                th Email 
+                th Filiacao
+            tr
+                td #{dados.name}
+                td #{dados.username}
+                td #{dados.email}
+                td #{dados.filiacao}
+
+        //p Visualizar sua password:
+
+        .w3-container
+            a.w3-button.w3-dark-grey(href="/login") Realizar login
+        .w3-container
+        footer.w3-container.w3-red
+            address Grupo NPM Starters
