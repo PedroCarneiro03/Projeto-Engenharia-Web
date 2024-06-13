@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* GET pag registo. */
 router.get('/registar', function(req, res, next) {
-  res.render('paginaRegisto',{title:"Pagina Registo"});
+  res.render('paginaRegisto',{title:"Pagina Registo", failVazio:false, failRegisto:false});
 });
 
 /* POST pag registo. */
@@ -20,20 +20,25 @@ router.post('/registar', function(req, res, next) {
 
   // Validar
   if (!username || !password || !name || !email || !filiacao) {
-    console.log("Dados invalidos!");
-    return res.status(400).send('Todos os campos são obrigatorios!');
+    console.log("Dados inválidos!");
+    return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: true, failRegisto: false });
+  } else {
+    // Chamar a página de sucesso
+    axios.post('http://localhost:29052/auth/register', req.body)
+      .then(dados => {
+        return res.render('registoCompleto', { title: "Registo Completo!", dados: req.body });
+      })
+      .catch(error => {
+        console.error("Erro no registro:", error.message);
+        return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: false, failRegisto: true });
+      });
   }
-
-  // Chamar a página de sucesso
-  axios.post('http://localhost:29052/auth/register', req.body)
-    .then(dados => res.render('registoCompleto',{title:"Registo Completo!", dados: req.body}))
-    .catch(e => res.status(500).jsonp({error: e}))
 });
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* GET pag login */
 router.get('/login', function(req, res, next) {
-  res.render('paginaLogin',{title:"Pagina Login"});
+  res.render('paginaLogin',{title:"Pagina Login", failVazio: false, failLogin: false});
 });
 
 /* POST pag login */
@@ -44,13 +49,13 @@ router.post('/login', function(req, res, next) {
   // Validar
   if (!username || !password) {
     console.log("Dados invalidos!");
-    return res.status(400).send('Todos os campos são obrigatorios!');
+    res.render('paginaLogin',{title:"Pagina Login", failVazio: true, failLogin: false});
+  } else {
+    // Chamar a página de sucesso
+    axios.post('http://localhost:29052/auth/login', req.body)
+      .then(dados => res.render('loginCompleto',{title:"Login Completo!", dados: req.body}))
+      .catch(ados => res.render('paginaLogin',{title:"Login Errado!", failVazio: false, failLogin: true, dados: req.body}))
   }
-
-  // Chamar a página de sucesso
-  axios.post('http://localhost:29052/auth/login', req.body)
-    .then(dados => res.render('loginCompleto',{title:"Login Completo!", dados: req.body}))
-    .catch(e => res.status(500).jsonp({error: e}))
 });
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

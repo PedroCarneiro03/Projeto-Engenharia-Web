@@ -1,31 +1,38 @@
 extends layout
 
 block content
-  .w3-card-4
-        header.w3-container.w3-red
-            h1= title
-        .w3-container
-            table.w3-table-all
+    // Fundo e navbar
+    include componentes/navbar
+    div.um-fundo
+    
+     // Header
+    .w3-card-4
+        header.w3-container.w3-white.header-flex
+            h1.header-title.regular Visualizar Recursos
+            img.header-logo(src="/imagens/umLogo.png" alt="Uminho logo")
+
+
+    .w3-container
+        table.w3-table-all
+            tr
+                th Identificador
+                th Tipo
+                th Titulo
+                th Subtitulo
+                th Data de Criacao
+                th Data de Registo
+                th Autor
+
+            each item in lista
                 tr
-                    th Identificador
-                    th Tipo
-                    th Titulo
-                    th Subtitulo
-                    th Data de Criacao
-                    th Data de Registo
-                    th Autor
+                    td
+                      a(href="/recursos/"+item._id) #{item._id}
+                    td=item.tipo
+                    td=item.titulo
+                    td=item.subtitulo
+                    td=item.dataCriacao
+                    td=item.dataRegisto
+                    td=item.autor
 
-                each item in lista
-                    tr
-                        td
-                          a(href="/recursos/"+item._id) #{item._id}
-                        td=item.tipo
-                        td=item.titulo
-                        td=item.subtitulo
-                        td=item.dataCriacao
-                        td=item.dataRegisto
-                        td=item.autor
-
-        footer.w3-container.w3-red
-            address Grupo NPM Starters
-            a(href="/") Voltar 
+    // Footer
+    include componentes/rodape

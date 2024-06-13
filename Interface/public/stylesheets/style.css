@@ -1,3 +1,4 @@
+/* NAO MEXER NESTA PARTE SENAO DESTROI AS PAGINAS TODAS PLS */
 * {
   margin: 0;
   padding: 0;
@@ -13,7 +14,7 @@ body {
 }
 
 main {
-  flex: 1; /* Expande o main para ocupar todo o espaço restante */
+  flex: 1;
 }
 
 footer {
@@ -21,7 +22,8 @@ footer {
   bottom: 0;
   width: 100%;
 }
-
+/*----------------------------------------------------------------------------------------------------------*/
+/* Usado para o fundo das paginas */
 .um-fundo {
   position: fixed;
   top: 0;
@@ -35,10 +37,7 @@ footer {
   z-index: -1; /* Ensure the image is behind other content */
 }
 
-
-
-
-
+/*----------------------------------------------------- FONTES -----------------------------------------------------*/
 @font-face {
   font-family: 'LemonMilk';
   src: url('/fontes/lemonmilk.otf') format('truetype');
@@ -72,7 +71,7 @@ footer {
   font-family: 'Regular', sans-serif;
 }
 
-
+/*----------------------------------------------------- HEADER -----------------------------------------------------*/
 /* Estilo para o header como flex container */
 .header-flex {
     display: flex;
@@ -92,22 +91,24 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem; /* Adicione preenchimento conforme necessário */
+  padding: 1rem; 
 }
 
-/* Estilo para o título no header */
+/*----------------------------------------------------- Estilo para o título no header -----------------------------------------------------*/
+/* Este estilo é usado no titlo da barra de cima */
 .header-title {
-  margin: 0; /* Remove a margem padrão */
+  margin: 0;
   flex: 1;
 }
 
-/* Estilo para a logo no header */
+/* Este estilo é usado no logo da universidade */
 .header-logo {
-  height: 50px; /* Ajuste a altura conforme necessário */
+  height: 50px;
   width: auto;
 }
 
-/* Estilo para centralizar o conteúdo */
+/*----------------------------------------------------- Estilo para caixas -----------------------------------------------------*/
+/* Isto é usado em uma caixa para centralizar o conteudo*/
 .caixacentrada {
   display: flex;
   justify-content: center;
@@ -117,12 +118,29 @@ footer {
   width: 60vh;
 }
 
-.arredondado {
-  border-radius: 10px; /* Raio dos cantos arredondados */
+/* Isto é usado em uma caixa, faz com que o conteudo fique la dentro com espaço até as bordas*/
+.caixanormal{
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  width: 60vh;
 }
 
+/* Estilo mais preguiçoso de sempre mas funciona */
+.arredondado {border-radius: 10px; }
+
+/* Este estilo é mt importante, é usado nas divs para centralizar */
 .conteudo{
   margin-top:30px;
   display: flex;
   justify-content: center;
 }
+
+/* Usei isto porque fica mais fixe */
+.rmargin20{margin-right: 20px;}
+.lmargin20{margin-left: 20px;}
+.rpad20{padding-right: 20px;}
+.lpad20{padding-left: 20px;}
+.tmargin20{margin-top: 20px;}
+ 
