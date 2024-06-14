@@ -19,7 +19,7 @@ router.get('/verify', auth.verificaAcesso, function(req, res){
 })
 
 
-router.get('/:id', auth.verificaAcesso, function(req, res){
+router.get('/:id', auth.verificaAcesso, auth.verificaIdCorrespondenteOuAdmin, function(req, res){
   User.getUser(req.params.id)
     .then(dados => res.status(200).jsonp({dados: dados}))
     .catch(e => res.status(500).jsonp({error: e}))
@@ -31,34 +31,40 @@ router.post('/', auth.verificaAcesso, function(req, res){
     .catch(e => res.status(500).jsonp({error: e}))
 })
 
-router.post('/register', /*auth.verificaAcesso,*/ function(req, res) {
-  console.log('Register:' + JSON.stringify(req.body))
-  var d = new Date().toISOString().substring(0, 10);
-  userModel.register(new userModel({  username: req.body.username, 
-                                      name: req.body.name, 
-                                      email: req.body.email,
-                                      filiacao: req.body.filiacao, 
-                                      level: "consumidor",
-                                      active: true, 
-                                      dateRegisto: d }), 
-                req.body.password, 
-                function(err, user) {
-                  if (err) 
-                    res.jsonp({error: err, message: "Register error: " + err})
-                  else{
-                    passport.authenticate("local")(req,res,function(){
-                      jwt.sign({ username: req.user.username, level: req.user.level, 
-                        sub: 'projeto de EngWeb2024'}, 
-                        "EngWeb2024",
-                        {expiresIn: 3600},
-                        function(e, token) {
-                          if(e) res.status(500).jsonp({error: "Erro na geração do token: " + e}) 
-                          else res.status(201).jsonp({token: token})
-                        });
-                    })
-                  }     
-  })
-})
+router.post('/register', function(req, res) {
+  userModel.findOne({ username: req.body.username })
+      .then(existingUser => {
+          if (existingUser) {
+              throw new Error('Username em uso, por favor insira outro.');
+          } else {
+              var d = new Date().toISOString().substring(0, 10);
+              return userModel.register(new userModel({
+                  username: req.body.username,
+                  name: req.body.name,
+                  email: req.body.email,
+                  filiacao: req.body.filiacao,
+                  level: "consumidor",
+                  active: true,
+                  dateRegisto: d
+              }), req.body.password);
+          }
+      })
+      .then(user => {
+          passport.authenticate("local")(req, res, function() {
+              jwt.sign({
+                  username: req.user.username,
+                  level: req.user.level,
+                  sub: 'projeto de EngWeb2024'
+              }, "EngWeb2024", { expiresIn: 3600 }, function(e, token) {
+                  if (e) res.status(500).jsonp({ error: "Erro na geração do token: " + e });
+                  else res.status(201).jsonp({ token: token });
+              });
+          });
+      })
+      .catch(err => {
+          res.jsonp({ error: err.message, message: "Erro de Regisro: " + err.message });
+      });
+});
   
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', { session: false }, (err, user, info) => {
@@ -80,7 +86,7 @@ router.post('/login', (req, res, next) => {
   })(req, res, next);
 })
 
-router.put('/:id', auth.verificaAcesso, function(req, res) {
+router.put('/:id', auth.verificaAcesso, auth.verificaIdCorrespondenteOuAdmin, function(req, res) { 
   User.updateUser(req.params.id, req.body)
     .then(dados => {
       res.jsonp(dados)
@@ -90,7 +96,7 @@ router.put('/:id', auth.verificaAcesso, function(req, res) {
     })
 })
 
-router.put('/:id/desativar', auth.verificaAcesso, function(req, res) {
+router.put('/:id/desativar', auth.verificaAcesso, auth.verificaAdmin, function(req, res) {
   User.updateUserStatus(req.params.id, false)
     .then(dados => {
       res.jsonp(dados)
@@ -100,7 +106,7 @@ router.put('/:id/desativar', auth.verificaAcesso, function(req, res) {
     })
 })
 
-router.put('/:id/ativar', auth.verificaAcesso, function(req, res) {
+router.put('/:id/ativar', auth.verificaAcesso, auth.verificaAdmin, function(req, res) {
   User.updateUserStatus(req.params.id, true)
     .then(dados => {
       res.jsonp(dados)
@@ -110,7 +116,7 @@ router.put('/:id/ativar', auth.verificaAcesso, function(req, res) {
     })
 })
 
-router.put('/:id/password', auth.verificaAcesso, function(req, res) {
+router.put('/:id/password', auth.verificaAcesso, auth.verificaIdCorrespondenteOuAdmin, function(req, res) {
   User.updateUserPassword(req.params.id, req.body)
     .then(dados => {
       res.jsonp(dados)
@@ -120,7 +126,27 @@ router.put('/:id/password', auth.verificaAcesso, function(req, res) {
     })
 })
 
-router.delete('/:id', auth.verificaAcesso, function(req, res) {
+router.put('/produtor', auth.verificaAcesso, function(req, res) {
+  const { username } = req.body;
+  User.updateToProducer(username)
+      .then(user => {
+          if (user.level === 'consumidor') {
+              res.jsonp({ message: 'User updated to producer', user: user });
+          } else {
+              res.jsonp({ message: 'User is already a producer or has a higher level', user: user });
+          }
+      })
+      .catch(error => {
+          if (error.message === 'User not found') {
+              res.status(404).jsonp({ error: error.message });
+          } else {
+              res.status(500).jsonp({ error: 'Error updating user: ' + error });
+          }
+      });
+});
+
+
+router.delete('/:id', auth.verificaAcesso, auth.verificaIdCorrespondenteOuAdmin, function(req, res) {
   User.deleteUser(req.params.id)
     .then(dados => {
       res.jsonp(dados)

@@ -56,21 +56,29 @@ module.exports.updateUserStatus = (id, status) => {
             })
 }
 
-const generateSaltAndHash = (password) => {
-    const salt = crypto.randomBytes(16).toString('hex');
-    const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-    return { salt, hash };
+module.exports.updateUserPassword = (id, pwd) => {
+    return User.findById(id)
+        .then(user => {
+            if (!user) throw new Error('User not found');
+            return user.setPassword(pwd.password);
+        })
+        .then(user => user.save())
+        .then(resposta => resposta)
+        .catch(erro => { throw erro });
 };
 
-module.exports.updateUserPassword = (id, pwd) => {
-    const { salt, hash } = generateSaltAndHash(pwd.password); 
-
-    return User.updateOne({_id: id}, { salt, hash })
-        .then(resposta => {
-            return resposta;
-        })
-        .catch(erro => {
-            return erro;
+module.exports.updateToProducer = (username) => {
+    return userModel.findOne({ username: username })
+        .then(user => {
+            if (!user) {
+                throw new Error('User not found');
+            }
+            if (user.level === 'consumidor') {
+                user.level = 'produtor';
+                return user.save();
+            } else {
+                return user; 
+            }
         });
 };
 
