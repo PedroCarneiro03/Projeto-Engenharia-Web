@@ -15,6 +15,7 @@ module.exports.verificaAcesso = function (req, res, next){
         }
         else{
           req.user = payload;
+          //console.log(req.user)
           next()
         }
       })

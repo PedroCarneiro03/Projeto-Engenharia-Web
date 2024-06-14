@@ -10,6 +10,7 @@ const path = require('path');
 const crypto = require('crypto');
 const axios = require("axios");
 const FormData = require('form-data');
+var auth = require("../auth/auth")
 
 async function calculateFileHash(filePath) {
     const hash = crypto.createHash('sha256');
@@ -24,7 +25,7 @@ async function calculateFileHash(filePath) {
 
 
 /* GET home recursos page. */
-router.get('/', function(req, res, next) {
+router.get('/', auth.verificaAcesso,function(req, res, next) {
 
     axios.get("http://localhost:29050/recursos")
         .then(resposta=>{
@@ -37,12 +38,12 @@ router.get('/', function(req, res, next) {
 });
 
 /* GET add recursos. */
-router.get('/add', function(req, res, next) {
+router.get('/add',auth.verificaAcesso, function(req, res, next) {
     res.render('adicionarRecursos',{title:"Upload de Arquivos"});
 });
 
 
-router.get("/download/tudo/:autor/:id",  function(req,res,next){
+router.get("/download/tudo/:autor/:id", auth.verificaAcesso, function(req,res,next){
        
         axios.get(`http://localhost:29050/recursos/download/${req.params.autor}/${req.params.id}`,{responseType: 'arraybuffer'})
         .then(resposta=> {
@@ -66,7 +67,7 @@ router.get('/download/:autor/:id/:fname', function(req, res, next) {
 
 
 
-router.get('/:id', function(req, res, next) {
+router.get('/:id',auth.verificaAcesso, function(req, res, next) {
 
     axios.get("http://localhost:29050/recursos/" + req.params.id)
         .then(resposta=>{
@@ -105,8 +106,14 @@ router.get('/:id', function(req, res, next) {
 
 
 //Post de varios ficheiros
-router.post('/', upload.array('files'), async function(req, res, next) {
+router.post('/', upload.array('files'),auth.verificaAcesso, async function(req, res, next) {
     
+    
+    req.body["autor"]=req.body.user["username"]
+
+    //apagar o user do req.body
+    delete req.body.user
+    //console.log(req.body)
     const files = req.files;
     // Gerar um _id aleatório usando uuid
     const _id = uuidv4();
@@ -210,7 +217,7 @@ router.post('/', upload.array('files'), async function(req, res, next) {
 });
 
 //avaliar um recurso
-router.post("/avaliar/:id",function(req,res,next){
+router.post("/avaliar/:id",auth.verificaAcesso,function(req,res,next){
     axios.get("http://localhost:29050/recursos/" + req.params.id)
     .then(resposta=>{
         //verificar que o user ja avaliou
@@ -228,7 +235,7 @@ router.post("/avaliar/:id",function(req,res,next){
             }
             if(!encontrou){
                 let avaliacao= {
-                    usuario_id:req.body["usuario_id"],
+                    usuario_id:req.body.user["username"],
                     rating:req.body["rating"]
                 }
                 resposta.data["avaliacoes"].push(avaliacao)

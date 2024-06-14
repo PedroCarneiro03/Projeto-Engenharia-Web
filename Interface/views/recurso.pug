@@ -25,21 +25,54 @@ block content
                 strong Autor:
                 |  #{item.autor}
             p   
-                strong Rating:
                 .w3-text-yellow
-                    p #{mediaRating} estrelas
+                    p Rating: #{mediaRating} estrelas
             a.w3-button.w3-green(href=`http://localhost:29051/recursos/download/tudo/${item.autor}/${item._id}`) Download ZIP
+            p
+                strong Avaliar o Recurso (1-5 estrelas):
             form(action="/recursos/avaliar/"+item._id,method="post")
+                label 1
                 input(type="radio" name="rating" id="1-stars" value=1)
+                br
+                label 2
                 input(type="radio" name="rating" id="2-stars" value=2)
+                br
+                label 3
                 input(type="radio" name="rating" id="3-stars" value=3)
+                br
+                label 4
                 input(type="radio" name="rating" id="4-stars" value=4)
+                br
+                label 5
                 input(type="radio" name="rating" id="5-stars" value=5)
-                input(type="text" name="usuario_id")
-                button.w3-btn.w3-green.w3-mb-2(type='submit') Avaliar
+                br
+                button#submitButton.w3-btn.w3-green.w3-mb-2(type='submit') Avaliar
 
 
 
         footer.w3-container.w3-red  
             address Grupo NPM Starters
             a(href="/recursos") Voltar 
+    script.
+      // Função para verificar se algum rádio está selecionado
+      function checkRadioButtons() {
+          const radioButtons = document.querySelectorAll('input[name="rating"]');
+          let isChecked = false;
+          radioButtons.forEach((radio) => {
+              if (radio.checked) {
+                  isChecked = true;
+              }
+          });
+
+          const submitButton = document.getElementById('submitButton');
+          submitButton.style.display = isChecked ? 'block' : 'none';
+      }
+
+      // Adicionar evento aos rádios
+      const radioButtons = document.querySelectorAll('input[name="rating"]');
+      radioButtons.forEach((radio) => {
+          radio.addEventListener('change', checkRadioButtons);
+      });
+
+      // Verificação inicial (caso já haja um rádio selecionado)
+      document.addEventListener('DOMContentLoaded', checkRadioButtons);

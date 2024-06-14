@@ -53,7 +53,10 @@ router.post('/login', function(req, res, next) {
   } else {
     // Chamar a página de sucesso
     axios.post('http://localhost:29052/auth/login', req.body)
-      .then(dados => res.render('loginCompleto',{title:"Login Completo!", dados: req.body}))
+      .then(dados => {
+        res.cookie("token",dados.data.token)
+        res.render('loginCompleto',{title:"Login Completo!", dados: req.body})
+    })
       .catch(ados => res.render('paginaLogin',{title:"Login Errado!", failVazio: false, failLogin: true, dados: req.body}))
   }
 });

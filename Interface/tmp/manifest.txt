@@ -6,9 +6,5 @@
   {
     "filename": "Screenshot from 2024-05-16 16-37-27.png",
     "hash": "772de32250e7db1bca57fb31e95a22d74e7bdf8bf2c6c53bb1a6b8d19a3f1da7"
-  },
-  {
-    "filename": "contratos2024.csv",
-    "hash": "6bac769e32797f72e37fea78df99613f302507f39babad2ea5da1f9be7398e49"
   }
 ]

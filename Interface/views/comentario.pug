@@ -8,8 +8,6 @@ block content
             form.w3-container(action='/posts/comentario/'+id, method='post', enctype='multipart/form-data')
                 fieldset
                     legend Metadados
-                    label Autor
-                    input(type="text" id="autor" name="autor" required)
                     label Conteudo
                     textarea(id="conteudo" name="conteudo" required)
                 button.w3-btn.w3-green.w3-mb-2(type='submit') Upload

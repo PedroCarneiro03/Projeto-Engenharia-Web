@@ -4,12 +4,14 @@ var axios= require("axios");
 var { v4: uuidv4 } = require('uuid');
 var multer = require('multer')
 const upload = multer({ dest: 'uploads/' })
+var auth = require("../auth/auth")
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-
+router.get('/', auth.verificaAcesso,function(req, res, next) {
+  console.log(req.body)
   axios.get("http://localhost:29050/posts")
     .then(resposta=>{
+      
       res.render('visualizarPosts', { title: 'Gestao de posts Home Page' ,lista:resposta.data});
     })
     .catch(erro=>{
@@ -21,12 +23,12 @@ router.get('/', function(req, res, next) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* GET add post */
-router.get('/add', function(req, res, next) {
+router.get('/add',auth.verificaAcesso, function(req, res, next) {
   res.render('addPost', { title: 'Página de adição de posts'});
 });
 
 /* POST add post */
-router.post('/add', function(req, res, next) {
+router.post('/add', auth.verificaAcesso,function(req, res, next) {
   // Obter os dados da pagina de registo
   const {descricao, recurso} = req.body;
 
@@ -49,7 +51,7 @@ router.post('/add', function(req, res, next) {
 });
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-router.get('/like/:id', function(req, res, next) {
+router.get('/like/:id',auth.verificaAcesso, function(req, res, next) {
 
     axios.get("http://localhost:29050/posts/" + req.params.id)
       .then(resposta=>{
@@ -68,13 +70,14 @@ router.get('/like/:id', function(req, res, next) {
     
   });
 
-  router.get("/comentario/escrever/:id",function(req, res, next) {
+  router.get("/comentario/escrever/:id",auth.verificaAcesso,function(req, res, next) {
+    console.log(req.body)
     res.render('comentario', { title: 'Comentario para o post ' + req.params.id ,id:req.params.id});
   })
 
   
 
-  router.get('/:id', function(req, res, next) {
+  router.get('/:id', auth.verificaAcesso,function(req, res, next) {
 
     axios.get("http://localhost:29050/posts/" + req.params.id)
       .then(resposta=>{
@@ -87,7 +90,7 @@ router.get('/like/:id', function(req, res, next) {
   });
 
 
-  router.post('/comentario/:id', upload.none(),function(req, res, next) {
+  router.post('/comentario/:id', upload.none(),auth.verificaAcesso,function(req, res, next) {
 
     console.log(req.body)
     axios.get("http://localhost:29050/posts/" + req.params.id)
@@ -107,7 +110,7 @@ router.get('/like/:id', function(req, res, next) {
         // Formatar a data e o tempo como uma string no formato "DD-MM-YYYY HH:MM:SS"
         const dateTimeString = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
         var comentario={
-            autor:req.body["autor"],
+            autor:req.body.user["username"],
             conteudo:req.body["conteudo"],
             data: dateTimeString
         } 

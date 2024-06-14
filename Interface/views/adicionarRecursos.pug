@@ -16,15 +16,13 @@ block content
                     label Titulo
                     input.w3-input.w3-round(type="text" name="titulo")
                     label Subtitulo
-                    input.w3-input.w3-round(type="text" name="subtitulo")
+                    input.w3-input.w3-round(type="text" name="subtitulo",value="")
                     label Data de Criacao
                     input.w3-input.w3-round(type="text" name="dataCriacao")
                     label Visibilidade
                     select(name='visibilidade', required)
                         option(value='publico') Publico
                         option(value='privado') Privado
-                    label Autor
-                    input.w3-input.w3-round(type="text" name="autor")
                     label Ficheiros
                     input(type='file', name='files', multiple)
                 button.w3-btn.w3-green.w3-mb-2(type='submit') Upload
