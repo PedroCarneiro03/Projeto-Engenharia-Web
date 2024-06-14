@@ -38,7 +38,7 @@ router.post('/', function(req, res) {
 
     req.body["dataRegisto"]=dateTimeString
     req.body["comentarios"]=[]
-    req.body["likes"]=0
+    req.body["likes"]=[]
     
     console.log("Dados recebidos no pedido de adição de post: "+JSON.stringify(req.body)+"\n")
 

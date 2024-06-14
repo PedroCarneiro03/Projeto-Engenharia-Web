@@ -27,35 +27,28 @@ router.get('/add',auth.verificaAcesso, function(req, res, next) {
   res.render('addPost', { title: 'Página de adição de posts'});
 });
 
-/* POST add post */
-router.post('/add', auth.verificaAcesso,function(req, res, next) {
-  // Obter os dados da pagina de registo
-  const {descricao, recurso} = req.body;
 
-  // Gerar um UUID
-  const _id = uuidv4();
-
-  // Adicionar o UUID aos dados do post (O post precisa de um ID)
-  const postData = { _id, descricao, recurso };
-
-  // Validar
-  if (!descricao || !recurso) {
-    console.log("Dados invalidos!");
-    return res.status(400).send('Todos os campos são obrigatorios!');
-  }
-
-  // Chamar a página de sucesso (Enviar post para a API)
-  axios.post('http://localhost:29050/posts', postData)
-    .then(dados => res.send('Post adicionado!'))
-    .catch(e => res.status(500).jsonp({error: e}))
-});
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 router.get('/like/:id',auth.verificaAcesso, function(req, res, next) {
 
     axios.get("http://localhost:29050/posts/" + req.params.id)
       .then(resposta=>{
-        resposta.data["likes"]=resposta.data["likes"]+1
+        
+        console.log(resposta.data)
+        const username = req.body.user["username"];
+
+        // Encontra o índice do username na lista
+        const index = resposta.data["likes"].indexOf(username);
+
+        if (index !== -1) {
+          // Se o username for encontrado, remove-o da lista
+          resposta.data["likes"].splice(index, 1);
+        } else {
+          // Se o username não for encontrado, adiciona-o à lista
+          resposta.data["likes"].push(username);
+        }
+
         axios.put("http://localhost:29050/posts/"+req.params.id,resposta.data)
         .then(response=>{
             res.render('post', { title: 'Post ' + req.params.id ,item:response.data});
@@ -89,6 +82,29 @@ router.get('/like/:id',auth.verificaAcesso, function(req, res, next) {
     
   });
 
+
+  /* POST add post */
+router.post('/add', auth.verificaAcesso,function(req, res, next) {
+  // Obter os dados da pagina de registo
+  const {descricao, recurso} = req.body;
+
+  // Gerar um UUID
+  const _id = uuidv4();
+
+  // Adicionar o UUID aos dados do post (O post precisa de um ID)
+  const postData = { _id, descricao, recurso };
+
+  // Validar
+  if (!descricao || !recurso) {
+    console.log("Dados invalidos!");
+    return res.status(400).send('Todos os campos são obrigatorios!');
+  }
+
+  // Chamar a página de sucesso (Enviar post para a API)
+  axios.post('http://localhost:29050/posts', postData)
+    .then(dados => res.send('Post adicionado!'))
+    .catch(e => res.status(500).jsonp({error: e}))
+});
 
   router.post('/comentario/:id', upload.none(),auth.verificaAcesso,function(req, res, next) {
 

@@ -13,7 +13,7 @@ block content
                 |  #{item.dataRegisto}
             p   
                 strong Likes:
-                |  #{item.likes}
+                |  #{item.likes.length}
             a.w3-button.w3-green(href="/recursos/"+item.recurso) Visualizar Recurso
             a.w3-button.w3-red(href="/posts/like/"+item._id) Like
             a.w3-button.w3-dark-grey(href="/posts/comentario/escrever/"+item._id) Comentar

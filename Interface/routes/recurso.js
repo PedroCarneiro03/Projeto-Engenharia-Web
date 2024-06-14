@@ -225,7 +225,7 @@ router.post("/avaliar/:id",auth.verificaAcesso,function(req,res,next){
             let encontrou = false 
             for (let i = 0; i < resposta.data["avaliacoes"].length; i++) {
                 // Verifica se o usuario_id do objeto atual é igual ao usuario_id do req.body
-                if (resposta.data["avaliacoes"][i].usuario_id === req.body["usuario_id"]) {
+                if (resposta.data["avaliacoes"][i].usuario_id === req.body.user["username"]) {
                     // Altera o valor do campo rating
                     resposta.data["avaliacoes"][i].rating = req.body["rating"];
                     // Saia do loop, pois já encontrou e alterou o objeto

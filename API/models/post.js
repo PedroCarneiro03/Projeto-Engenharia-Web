@@ -12,7 +12,7 @@ var postSchema = new mongoose.Schema({
     descricao:String,
     dataRegisto:String,
     comentarios:[commentSchema],
-    likes:Number,
+    likes:[String],
     recurso:String
 }, { versionKey: false })
 
