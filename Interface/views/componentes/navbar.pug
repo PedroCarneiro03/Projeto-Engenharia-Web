@@ -2,5 +2,11 @@ div.w3-bar.w3-black
     a(href="/", class="w3-bar-item w3-button") Início
     a(href="/posts", class="w3-bar-item w3-button") Posts
     a(href="/recursos", class="w3-bar-item w3-button") Recursos
-    a(href="/registar", class="w3-bar-item w3-button w3-right") Registar
-    a(href="/login", class="w3-bar-item w3-button w3-right") Login
+    if(!logado)
+        a(href="/registar", class="w3-bar-item w3-button w3-right") Registar
+    
+    if(!logado)
+        a(href="/login", class="w3-bar-item w3-button w3-right") Login
+
+    if(logado)
+        a(href="/logout", class="w3-bar-item w3-button w3-right") Logout

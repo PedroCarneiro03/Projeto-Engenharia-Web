@@ -7,12 +7,12 @@ const upload = multer({ dest: 'uploads/' })
 var auth = require("../auth/auth")
 
 /* GET home page. */
-router.get('/', auth.verificaAcesso,function(req, res, next) {
+router.get('/', auth.verificaAcesso, auth.verificaLogado ,function(req, res, next) {
   console.log(req.body)
   axios.get("http://localhost:29050/posts")
     .then(resposta=>{
       
-      res.render('visualizarPosts', { title: 'Gestao de posts Home Page' ,lista:resposta.data});
+      res.render('visualizarPosts', { title: 'Gestao de posts Home Page' ,lista:resposta.data, logado: req.body.logado});
     })
     .catch(erro=>{
       res.render("error",{error: erro, message:"Erro ao recuperar os posts"})
@@ -20,17 +20,14 @@ router.get('/', auth.verificaAcesso,function(req, res, next) {
   
 });
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* GET add post */
-router.get('/add',auth.verificaAcesso, function(req, res, next) {
-  res.render('addPost', { title: 'Página de adição de posts'});
+router.get('/add',auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
+  res.render('addPost', { title: 'Página de adição de posts', logado: req.body.logado});
 });
 
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-router.get('/like/:id',auth.verificaAcesso, function(req, res, next) {
+router.get('/like/:id',auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
     axios.get("http://localhost:29050/posts/" + req.params.id)
       .then(resposta=>{
@@ -51,7 +48,16 @@ router.get('/like/:id',auth.verificaAcesso, function(req, res, next) {
 
         axios.put("http://localhost:29050/posts/"+req.params.id,resposta.data)
         .then(response=>{
-            res.render('post', { title: 'Post ' + req.params.id ,item:response.data});
+            // Verificar se dei like
+            let deilike = false
+            for (let i = 0; i < response.data["likes"].length; i++) {
+              if (response.data["likes"][i] == username) {
+                deilike = true
+                break
+              }
+            }
+
+            res.render('post', { title: 'Post ' + req.params.id ,item:response.data, logado: req.body.logado, deilike: deilike});
         })
         .catch(erro=>{
             res.render("error",{error: erro, message:"Erro ao atualizar o post"})
@@ -65,16 +71,16 @@ router.get('/like/:id',auth.verificaAcesso, function(req, res, next) {
 
   router.get("/comentario/escrever/:id",auth.verificaAcesso,function(req, res, next) {
     console.log(req.body)
-    res.render('comentario', { title: 'Comentario para o post ' + req.params.id ,id:req.params.id});
+    res.render('comentario', { title: 'Comentario para o post ' + req.params.id ,id:req.params.id , logado: req.body.logado});
   })
 
   
 
-  router.get('/:id', auth.verificaAcesso,function(req, res, next) {
+  router.get('/:id', auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
     axios.get("http://localhost:29050/posts/" + req.params.id)
       .then(resposta=>{
-        res.render('post', { title: 'Post ' + req.params.id ,item:resposta.data});
+        res.render('post', { title: 'Post ' + req.params.id ,item:resposta.data , logado: req.body.logado});
       })
       .catch(erro=>{
         res.render("error",{error: erro, message:"Erro ao recuperar o post"})
@@ -84,7 +90,7 @@ router.get('/like/:id',auth.verificaAcesso, function(req, res, next) {
 
 
   /* POST add post */
-router.post('/add', auth.verificaAcesso,function(req, res, next) {
+router.post('/add', auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
   // Obter os dados da pagina de registo
   const {descricao, recurso} = req.body;
 
@@ -97,16 +103,32 @@ router.post('/add', auth.verificaAcesso,function(req, res, next) {
   // Validar
   if (!descricao || !recurso) {
     console.log("Dados invalidos!");
-    return res.status(400).send('Todos os campos são obrigatorios!');
+    return res.render('addPost', {failvazio: true, logado: req.body.logado});
   }
 
-  // Chamar a página de sucesso (Enviar post para a API)
-  axios.post('http://localhost:29050/posts', postData)
-    .then(dados => res.render('addPostSucesso'))
-    .catch(e => res.status(500).jsonp({error: e}))
+  // Verificar se o recurso existe na base de dados
+  axios.get("http://localhost:29050/recursos/" + recurso)
+      .then(resposta => {
+
+        // RECURSO NAO EXISTE
+        if(resposta.data == null || resposta.data.autor != req.body.user["username"]){
+          return res.render('addPost', {failvazio: false, failrecurso: true, logado: req.body.logado});
+        } 
+        
+        else {
+          // Chamar a página de sucesso (Enviar post para a API)
+          axios.post('http://localhost:29050/posts', postData)
+          .then(dados => res.render('addPostSucesso'), {logado: req.body.logado})
+          .catch(e => res.status(500).jsonp({error: e}))
+        }
+      })
+      .catch(erro => {
+        return res.render('addPost', {failvazio: false, faildata: true, logado: req.body.logado});
+      })
+
 });
 
-  router.post('/comentario/:id', upload.none(),auth.verificaAcesso,function(req, res, next) {
+  router.post('/comentario/:id', upload.none(),auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
     console.log(req.body)
     axios.get("http://localhost:29050/posts/" + req.params.id)
@@ -133,7 +155,7 @@ router.post('/add', auth.verificaAcesso,function(req, res, next) {
         resposta.data["comentarios"].push(comentario)
         axios.put("http://localhost:29050/posts/"+req.params.id,resposta.data)
         .then(response=>{
-            res.render('post', { title: 'Post ' + req.params.id ,item:response.data});
+            res.render('post', { title: 'Post ' + req.params.id ,item:response.data, logado: req.body.logado});
         })
         .catch(erro=>{
             res.render("error",{error: erro, message:"Erro ao atualizar o post"})
@@ -142,7 +164,7 @@ router.post('/add', auth.verificaAcesso,function(req, res, next) {
         
       })
       .catch(erro=>{
-        res.render("error",{error: erro, message:"Erro ao recuperar o post"})
+        res.render("error",{error: erro, message:"Erro ao recuperar o post", logado: req.body.logado})
       })
     
   });

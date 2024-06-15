@@ -45,8 +45,14 @@ block content
                                     td=c.data
                 div.tmargin15
                     a.w3-button.w3-blue.rmargin15(href="/recursos/"+item.recurso) Visualizar Recurso
-                    a.w3-button.w3-blue.rmargin15(href="/posts/like/"+item._id) Like
+                    
+                    if(deilike)
+                        a.w3-button.w3-blue.rmargin15(href="/posts/like/"+item._id) Dislike
+                    else 
+                        a.w3-button.w3-blue.rmargin15(href="/posts/like/"+item._id) Like
+
                     a.w3-button.w3-blue.rmargin15(href="/posts/comentario/escrever/"+item._id) Comentar
+                    a.w3-button.w3-blue.rmargin15(href="/posts") Regressar
 
     // Footer
     include componentes/rodape

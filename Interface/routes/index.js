@@ -1,66 +1,74 @@
 var express = require('express');
 var axios = require('axios');
 var router = express.Router();
+var auth = require("../auth/auth")
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('paginaPrincipal',{title:"Plataforma de Gestão e Disponibilização de Recursos Educativos"});
+router.get('/', auth.verificaLogado ,function(req, res, next) {
+  res.render('paginaPrincipal',{title:"Plataforma de Gestão e Disponibilização de Recursos Educativos", logado: req.body.logado});
 });
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* GET pag registo. */
-router.get('/registar', function(req, res, next) {
-  res.render('paginaRegisto',{title:"Pagina Registo", failVazio:false, failRegisto:false});
+router.get('/registar', auth.verificaLogado, function(req, res, next) {
+  res.render('paginaRegisto',{title:"Pagina Registo", failVazio:false, failRegisto:false, logado: req.body.logado});
 });
 
 /* POST pag registo. */
-router.post('/registar', function(req, res, next) {
+router.post('/registar', auth.verificaLogado, function(req, res, next) {
   // Obter os dados da pagina de registo
   const {username, password, name, email, filiacao } = req.body;
 
   // Validar
   if (!username || !password || !name || !email || !filiacao) {
     console.log("Dados inválidos!");
-    return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: true, failRegisto: false });
+    return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: true, failRegisto: false , logado: req.body.logado});
   } else {
     // Chamar a página de sucesso
     axios.post('http://localhost:29052/auth/register', req.body)
       .then(dados => {
-        return res.render('registoCompleto', { title: "Registo Completo!", dados: req.body });
+        return res.render('registoCompleto', { title: "Registo Completo!", dados: req.body , logado: req.body.logado});
       })
       .catch(error => {
         console.error("Erro no registro:", error.message);
-        return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: false, failRegisto: true });
+        return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: false, failRegisto: true , logado: req.body.logado});
       });
   }
 });
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* GET pag login */
-router.get('/login', function(req, res, next) {
-  res.render('paginaLogin',{title:"Pagina Login", failVazio: false, failLogin: false});
+router.get('/login', auth.verificaLogado, function(req, res, next) {
+  res.render('paginaLogin',{title:"Pagina Login", failVazio: false, failLogin: false , logado: req.body.logado});
 });
 
 /* POST pag login */
-router.post('/login', function(req, res, next) {
+router.post('/login', auth.verificaLogado, function(req, res, next) {
   // Obter os dados da pagina de registo
   const {username, password} = req.body;
 
   // Validar
   if (!username || !password) {
     console.log("Dados invalidos!");
-    res.render('paginaLogin',{title:"Pagina Login", failVazio: true, failLogin: false});
+    res.render('paginaLogin',{title:"Pagina Login", failVazio: true, failLogin: false , logado: req.body.logado});
   } else {
     // Chamar a página de sucesso
     axios.post('http://localhost:29052/auth/login', req.body)
       .then(dados => {
         res.cookie("token",dados.data.token)
-        res.render('loginCompleto',{title:"Login Completo!", dados: req.body})
+        res.render('loginCompleto',{title:"Login Completo!", dados: req.body, logado: true})
     })
-      .catch(ados => res.render('paginaLogin',{title:"Login Errado!", failVazio: false, failLogin: true, dados: req.body}))
+      .catch(ados => res.render('paginaLogin',{title:"Login Errado!", failVazio: false, failLogin: true, dados: req.body, logado: req.body.logado}))
   }
 });
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/* GET pag logout */
+router.get('/logout', function(req, res, next) {
+  res.clearCookie("token")
+
+  res.redirect('/')
+});
 
 module.exports = router;

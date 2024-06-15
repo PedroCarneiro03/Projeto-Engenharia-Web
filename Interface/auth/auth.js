@@ -17,6 +17,15 @@ async function verificaAcesso(req, res, next) {
   }
 }
 
+async function verificaLogado(req, res, next) {
+  if (req.cookies && req.cookies.token) {
+    req.body["logado"] = true
+  } else {
+    req.body["logado"] = false
+  }
+  next();
+}
 
 
-module.exports = { verificaAcesso};
+
+module.exports = { verificaAcesso, verificaLogado};

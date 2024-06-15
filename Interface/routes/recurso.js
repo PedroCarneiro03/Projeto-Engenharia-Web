@@ -25,11 +25,11 @@ async function calculateFileHash(filePath) {
 
 
 /* GET home recursos page. */
-router.get('/', auth.verificaAcesso,function(req, res, next) {
+router.get('/', auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
     axios.get("http://localhost:29050/recursos")
         .then(resposta=>{
-            res.render('visualizarRecursos', { title: 'Gestao de Recursos' ,lista:resposta.data});
+            res.render('visualizarRecursos', { title: 'Gestao de Recursos' ,lista:resposta.data , logado: req.body.logado});
         })
         .catch(erro=>{
             res.render("error",{error: erro, message:"Erro ao recuperar os recursos"})
@@ -38,12 +38,12 @@ router.get('/', auth.verificaAcesso,function(req, res, next) {
 });
 
 /* GET add recursos. */
-router.get('/add',auth.verificaAcesso, function(req, res, next) {
-    res.render('adicionarRecursos',{title:"Upload de Arquivos"});
+router.get('/add',auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
+    res.render('adicionarRecursos',{title:"Upload de Arquivos", logado: req.body.logado});
 });
 
 
-router.get("/download/tudo/:autor/:id", auth.verificaAcesso, function(req,res,next){
+router.get("/download/tudo/:autor/:id", auth.verificaAcesso, auth.verificaLogado,function(req,res,next){
        
         axios.get(`http://localhost:29050/recursos/download/${req.params.autor}/${req.params.id}`,{responseType: 'arraybuffer'})
         .then(resposta=> {
@@ -67,7 +67,7 @@ router.get('/download/:autor/:id/:fname', function(req, res, next) {
 
 
 
-router.get('/:id',auth.verificaAcesso, function(req, res, next) {
+router.get('/:id',auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
     axios.get("http://localhost:29050/recursos/" + req.params.id)
         .then(resposta=>{
@@ -96,7 +96,7 @@ router.get('/:id',auth.verificaAcesso, function(req, res, next) {
                 media=soma/resposta.data["avaliacoes"].length
             }
 
-            res.render('recurso', { title: 'Recurso ' + req.params.id ,item:resposta.data,mediaRating:media});
+            res.render('recurso', { title: 'Recurso ' + req.params.id ,item:resposta.data,mediaRating:media, logado: req.body.logado});
         })
         .catch(erro=>{
         res.render("error",{error: erro, message:"Erro ao recuperar o recurso"})
@@ -106,9 +106,12 @@ router.get('/:id',auth.verificaAcesso, function(req, res, next) {
 
 
 //Post de varios ficheiros
-router.post('/', upload.array('files'),auth.verificaAcesso, async function(req, res, next) {
-    
-    
+router.post('/', upload.array('files'),auth.verificaAcesso, auth.verificaLogado, async function(req, res, next) {
+    const logadoNovo = req.body.logado
+    delete req.body.logado
+
+    console.log(req.body)
+
     req.body["autor"]=req.body.user["username"]
 
     //apagar o user do req.body
@@ -120,8 +123,10 @@ router.post('/', upload.array('files'),auth.verificaAcesso, async function(req, 
     req.body["_id"]=_id;
     const data = req.body;
 
+
+    // Verificar se foram enviados ficheiros
     if (!files || files.length === 0) {
-        return res.status(400).send('Nenhum arquivo enviado.');
+        return res.render('adicionarRecursos', { title: 'Adicionar Recurso', failvazio: false, semfiles: true, logado: logadoNovo});
     }
 
     // Criar o diretório temporário para os arquivos
@@ -134,9 +139,6 @@ router.post('/', upload.array('files'),auth.verificaAcesso, async function(req, 
         for (const file of files) {
         await fs.move(file.path, path.join(tempDir, file.originalname));
         }
-
-        
-        
 
         // Calcular os hashes de cada arquivo
         const manifest = [];
@@ -174,6 +176,7 @@ router.post('/', upload.array('files'),auth.verificaAcesso, async function(req, 
         
             // Adicionar os campos do req.body ao FormData
             for (const [key, value] of Object.entries(req.body)) {
+                console.log(key, value);
                 formData.append(key, value);
             }
         
@@ -182,7 +185,7 @@ router.post('/', upload.array('files'),auth.verificaAcesso, async function(req, 
                 ...formData.getHeaders() // Adicionar os headers do FormData
                 }
             })
-            res.render('addRecursoSucesso');
+            res.render('addRecursoSucesso', { title: 'Recurso Adicionado com Sucesso', logado: logadoNovo});
         } catch (error) {
             // Se ocorrer um erro no axios.post, envie uma resposta de erro
             console.error('Erro ao enviar o arquivo ZIP e os dados para a API:', error);
@@ -214,7 +217,7 @@ router.post('/', upload.array('files'),auth.verificaAcesso, async function(req, 
 });
 
 //avaliar um recurso
-router.post("/avaliar/:id",auth.verificaAcesso,function(req,res,next){
+router.post("/avaliar/:id",auth.verificaAcesso, auth.verificaLogado,function(req,res,next){
     axios.get("http://localhost:29050/recursos/" + req.params.id)
     .then(resposta=>{
         //verificar que o user ja avaliou
@@ -244,7 +247,7 @@ router.post("/avaliar/:id",auth.verificaAcesso,function(req,res,next){
                 res.redirect("/recursos/"+req.params.id)
             })
             .catch(erro=>{
-                res.render("error",{error: erro, message:"Erro ao alterar o recurso"})
+                res.render("error",{error: erro, message:"Erro ao alterar o recurso", logado: req.body.logado})
             })
         }
     })

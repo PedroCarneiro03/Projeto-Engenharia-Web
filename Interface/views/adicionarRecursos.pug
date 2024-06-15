@@ -27,7 +27,7 @@ block content
 
                     div.caixabloco
                         label Subtitulo
-                        input.w3-input.w3-round(type="text" name="subtitulo",value="")
+                        input.w3-input.w3-round(type="text" name="subtitulo")
 
                     div.caixabloco
                         label Data de Criacao
@@ -49,7 +49,14 @@ block content
                         label.rmargin15 Ficheiros
                         input(type='file', name='files', multiple)
 
-                button.w3-btn.w3-green.w3-mb-2.tmargin15(type='submit') Upload
+                if(semfiles)
+                    p(style='color:red') Inserir pelo menos um ficheiro!
+                
+                if(failvazio)
+                    p(style='color:red') Preencher todos os campos!
+
+                button.w3-btn.w3-green.w3-mb-2.tmargin15.rmargin15(type='submit') Upload
+                a.w3-button.w3-black.tmargin15(href="/recursos") Regressar
 
     // Footer
     include componentes/rodape

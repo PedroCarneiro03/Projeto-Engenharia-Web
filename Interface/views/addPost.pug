@@ -21,8 +21,15 @@ block content
                 input.w3-input(type="text" name="descricao")
                 label Recurso
                 input.w3-input(type="text" name="recurso")
+
+                if(failvazio)
+                    p(style='color:red') Preencher todos os campos!
                 
-                button.w3-btn.w3-green.w3-mb-2.tmargin20(type='submit') Adicionar post
+                if(failrecurso)
+                    p(style='color:red') Recurso não existe!
+                
+                button.w3-btn.w3-green.w3-mb-2.tmargin20.rmargin15(type='submit') Adicionar post
+                a.w3-button.w3-black.tmargin20(href="/posts") Regressar
         
     // Footer
     include componentes/rodape

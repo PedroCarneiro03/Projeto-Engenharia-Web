@@ -134,6 +134,16 @@ footer {
   padding-top: 15px;
   padding-bottom: 15px;
   width: 190vh;
+  margin-bottom: 20px;
+}
+
+/* Isto é usado em uma caixa, faz com que o conteudo fique la dentro com espaço até as bordas*/
+.caixanormalgorda{
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  width: 190vh;
 }
 
 /* Isto é usado em uma caixa, faz com que o conteudo fique la dentro com espaço até as bordas*/
@@ -157,6 +167,11 @@ footer {
   height: 50px;
 }
 
+.quadrado{
+  width: 50px;
+  height: 50px;
+}
+
 .mlauto {margin-left: auto;}
 .flexivel{display: flex;}
 .bloco{display: block;}
@@ -174,13 +189,14 @@ footer {
 /* É uma caixa bonita com borda preta e arredondada, é muito fixe (Usado na pagina dos posts)*/
 .caixafixe {
   border: 2px solid black;
+  background-color: #feff9c;
   border-radius: 10px; 
   padding: 10px; 
   box-sizing: border-box; 
 }
 
 .postsize {
-  width: 300px;
+  width: 340px;
   height: 240px;
 }
 
@@ -190,6 +206,14 @@ footer {
 
 .fontegrande {
   font-size: 20px;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.fixo {
+  position: fixed;
 }
 
 /* Usei isto porque fica mais fixe */
