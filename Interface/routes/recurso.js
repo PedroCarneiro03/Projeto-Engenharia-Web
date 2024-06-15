@@ -182,7 +182,7 @@ router.post('/', upload.array('files'),auth.verificaAcesso, async function(req, 
                 ...formData.getHeaders() // Adicionar os headers do FormData
                 }
             })
-            res.send('Arquivo ZIP e dados enviados com sucesso para a API.')
+            res.render('addRecursoSucesso');
         } catch (error) {
             // Se ocorrer um erro no axios.post, envie uma resposta de erro
             console.error('Erro ao enviar o arquivo ZIP e os dados para a API:', error);
@@ -211,9 +211,6 @@ router.post('/', upload.array('files'),auth.verificaAcesso, async function(req, 
         console.error(err);
         res.status(500).send('Erro ao processar os arquivos.');
     }
-
-
-
 });
 
 //avaliar um recurso

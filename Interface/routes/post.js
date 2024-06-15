@@ -102,7 +102,7 @@ router.post('/add', auth.verificaAcesso,function(req, res, next) {
 
   // Chamar a página de sucesso (Enviar post para a API)
   axios.post('http://localhost:29050/posts', postData)
-    .then(dados => res.send('Post adicionado!'))
+    .then(dados => res.render('addPostSucesso'))
     .catch(e => res.status(500).jsonp({error: e}))
 });
 

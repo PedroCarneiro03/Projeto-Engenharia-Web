@@ -8,31 +8,38 @@ block content
      // Header
     .w3-card-4
         header.w3-container.w3-white.header-flex
-            h1.header-title.regular Visualizar Recursos
+            h1.header-title.regular Plataforma de Gestão e Disponibilização de Recursos Educativos
             img.header-logo(src="/imagens/umLogo.png" alt="Uminho logo")
 
+    // Conteudo da pagina
+    div.conteudo 
+        // Caixa 
+        div.w3-white.caixanormalgorda.arredondado
+            .w3-container
+                div.flexivel
+                    h1.regular Visualizar Recursos
+                    a.w3-button.w3-black.mlauto.retangulo.fontegrande(href="/recursos/add") Criar recurso
 
-    .w3-container
-        table.w3-table-all
-            tr
-                th Identificador
-                th Tipo
-                th Titulo
-                th Subtitulo
-                th Data de Criacao
-                th Data de Registo
-                th Autor
+                table.w3-table-all
+                    tr
+                        th Identificador
+                        th Tipo
+                        th Titulo
+                        th Subtitulo
+                        th Data de Criacao
+                        th Data de Registo
+                        th Autor
 
-            each item in lista
-                tr
-                    td
-                      a(href="/recursos/"+item._id) #{item._id}
-                    td=item.tipo
-                    td=item.titulo
-                    td=item.subtitulo
-                    td=item.dataCriacao
-                    td=item.dataRegisto
-                    td=item.autor
+                    each item in lista
+                        tr
+                            td
+                                a(href="/recursos/"+item._id) #{item._id}
+                            td=item.tipo
+                            td=item.titulo
+                            td=item.subtitulo
+                            td=item.dataCriacao
+                            td=item.dataRegisto
+                            td=item.autor
 
     // Footer
     include componentes/rodape

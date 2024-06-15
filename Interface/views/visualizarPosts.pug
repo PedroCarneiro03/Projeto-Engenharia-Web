@@ -5,24 +5,30 @@ block content
     include componentes/navbar
     div.um-fundo
     
-     // Header
+    // Header
     .w3-card-4
         header.w3-container.w3-white.header-flex
-            h1.header-title.regular Gerir posts
+            h1.header-title.regular Plataforma de Gestão e Disponibilização de Recursos Educativos
             img.header-logo(src="/imagens/umLogo.png" alt="Uminho logo")
-
     
-
-    .w3-container
-        each item in lista
-            .w3-card-4.w3-dark-grey
-  
-                .w3-container.w3-center
-                    h3=item.descricao
-      
-                    h5 Likes: #{item.likes.length}
-                    h5 Data de Registo: #{item.dataRegisto}
-                    a.w3-button.w3-light-grey(href="/posts/"+item._id) Read More
+    // Conteudo da pagina
+    div.conteudo 
+        // Caixa 
+        div.w3-white.caixanormalgorda.arredondado
+            .w3-container
+                div.flexivel
+                    h1.regular Visualizar Posts
+                    a.w3-button.w3-black.mlauto.retangulo.fontegrande(href="/posts/add") Criar post
+                div.flexivel
+                    each item in lista
+                        div.caixafixe.postsize.rmargin15
+                                .w3-container.w3-center
+                                    h3=item.descricao
+                    
+                                    h5 Likes: #{item.likes.length}
+                                    h5 Data de Registo: #{item.dataRegisto}
+                                    a.w3-button.w3-green(href="/posts/"+item._id) Read More
+            
   
     // Footer
     include componentes/rodape
