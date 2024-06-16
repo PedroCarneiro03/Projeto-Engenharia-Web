@@ -208,7 +208,7 @@ router.post('/', upload.single('zip'), async function(req, res) {
         _id:req.body["_id"],
         tipo:req.body["tipo"],
         titulo:req.body["titulo"],
-        subtitulo:req.body["tipo"],
+        subtitulo:req.body["subtitulo"],
         dataCriacao:req.body["dataCriacao"],
         dataRegisto:dateTimeString,
         visibilidade:req.body["visibilidade"],

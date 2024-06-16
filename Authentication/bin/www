@@ -82,5 +82,5 @@ function onError(error) {
  */
 
 function onListening() {
-  console.log('Servidor à escuta na porta ' + port + '...');
+  console.log('Servidor à escuta na porta ', port);
 }

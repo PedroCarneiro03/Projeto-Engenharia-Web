@@ -37,6 +37,8 @@ block content
                         p(style="color:red;") Campos vazios!
                     if(failRegisto)
                         p(style="color:red;") Erro ao realizar registo!
+                    if(failUser)
+                        p(style="color:red;") Username já existente!
                     
                     div.conteudo
                         button.w3-btn.w3-green.w3-mb-2(type='submit') Registar

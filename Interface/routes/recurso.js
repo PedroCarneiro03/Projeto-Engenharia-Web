@@ -110,7 +110,7 @@ router.post('/', upload.array('files'),auth.verificaAcesso, auth.verificaLogado,
     const logadoNovo = req.body.logado
     delete req.body.logado
 
-    console.log(req.body)
+    //console.log(req.body)
 
     req.body["autor"]=req.body.user["username"]
 
@@ -121,8 +121,6 @@ router.post('/', upload.array('files'),auth.verificaAcesso, auth.verificaLogado,
     // Gerar um _id aleatório usando uuid
     const _id = uuidv4();
     req.body["_id"]=_id;
-    const data = req.body;
-
 
     // Verificar se foram enviados ficheiros
     if (!files || files.length === 0) {
@@ -173,19 +171,37 @@ router.post('/', upload.array('files'),auth.verificaAcesso, auth.verificaLogado,
             // Criar um objeto FormData para enviar os dados
             const formData = new FormData();
             formData.append('zip', zipFile, {filename:`${_id}.zip`});
-        
+                
             // Adicionar os campos do req.body ao FormData
             for (const [key, value] of Object.entries(req.body)) {
                 console.log(key, value);
                 formData.append(key, value);
             }
-        
             await axios.post("http://localhost:29050/recursos",formData,{
                 headers: {
                 ...formData.getHeaders() // Adicionar os headers do FormData
                 }
             })
+            
+            // Após o sucesso da requisição POST, atualizar o usuário para produtor
+            const authHeader = req.headers['authorization'];
+            console.log('AuthHeader:', authHeader);
+            if (authHeader) {
+                console.log('Token:', authHeader.split(' ')[1]);
+                const token = authHeader.split(' ')[1];
+                await axios.put("http://localhost:29052/auth/produtor",
+                    { username: req.body.autor },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+            }
+
             res.render('addRecursoSucesso', { title: 'Recurso Adicionado com Sucesso', logado: logadoNovo});
+
+           
         } catch (error) {
             // Se ocorrer um erro no axios.post, envie uma resposta de erro
             console.error('Erro ao enviar o arquivo ZIP e os dados para a API:', error);
