@@ -22,16 +22,21 @@ router.post('/registar', auth.verificaLogado, function(req, res, next) {
   // Validar
   if (!username || !password || !name || !email || !filiacao) {
     console.log("Dados inválidos!");
-    return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: true, failRegisto: false , logado: req.body.logado});
+    return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: true, failRegisto: false, failUser: false, logado: req.body.logado});
   } else {
     // Chamar a página de sucesso
     axios.post('http://localhost:29052/auth/register', req.body)
       .then(dados => {
-        return res.render('registoCompleto', { title: "Registo Completo!", dados: req.body , logado: req.body.logado});
+        if (dados.data.error) {
+          return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: false, failRegisto: false, failUser: true, logado: req.body.logado});
+        }
+        else{
+          return res.render('registoCompleto', { title: "Registo Completo!", dados: req.body , logado: req.body.logado});
+        }
       })
       .catch(error => {
         console.error("Erro no registro:", error.message);
-        return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: false, failRegisto: true , logado: req.body.logado});
+        return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: false, failRegisto: true, failUser: false, logado: req.body.logado});
       });
   }
 });

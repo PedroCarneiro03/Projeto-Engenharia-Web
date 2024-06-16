@@ -62,7 +62,7 @@ router.post('/register', function(req, res) {
           });
       })
       .catch(err => {
-          res.jsonp({ error: err.message, message: "Erro de Regisro: " + err.message });
+          res.jsonp({ error: err.message, message: "Erro de Registo: " + err.message });
       });
 });
   
@@ -85,6 +85,25 @@ router.post('/login', (req, res, next) => {
     });
   })(req, res, next);
 })
+
+router.put('/produtor', auth.verificaAcesso, function(req, res) {
+  const { username } = req.body;
+  User.updateToProducer(username)
+      .then(user => {
+          if (user.level === 'consumidor') {
+              res.jsonp({ message: 'User updated to producer', user: user });
+          } else {
+              res.jsonp({ message: 'User is already a producer or has a higher level', user: user });
+          }
+      })
+      .catch(error => {
+          if (error.message === 'User not found') {
+              res.status(404).jsonp({ error: error.message });
+          } else {
+              res.status(500).jsonp({ error: 'Error updating user: ' + error });
+          }
+      });
+});
 
 router.put('/:id', auth.verificaAcesso, auth.verificaIdCorrespondenteOuAdmin, function(req, res) { 
   User.updateUser(req.params.id, req.body)
@@ -126,24 +145,6 @@ router.put('/:id/password', auth.verificaAcesso, auth.verificaIdCorrespondenteOu
     })
 })
 
-router.put('/produtor', auth.verificaAcesso, function(req, res) {
-  const { username } = req.body;
-  User.updateToProducer(username)
-      .then(user => {
-          if (user.level === 'consumidor') {
-              res.jsonp({ message: 'User updated to producer', user: user });
-          } else {
-              res.jsonp({ message: 'User is already a producer or has a higher level', user: user });
-          }
-      })
-      .catch(error => {
-          if (error.message === 'User not found') {
-              res.status(404).jsonp({ error: error.message });
-          } else {
-              res.status(500).jsonp({ error: 'Error updating user: ' + error });
-          }
-      });
-});
 
 
 router.delete('/:id', auth.verificaAcesso, auth.verificaIdCorrespondenteOuAdmin, function(req, res) {

@@ -8,6 +8,8 @@ async function verificaAcesso(req, res, next) {
         headers: { Authorization: `Bearer ${req.cookies.token}` }
       });
       req.body["user"]=response.data.user
+      // Adicionar o token ao cabeçalho da requisição
+      req.headers['authorization'] = `Bearer ${req.cookies.token}`;
       next();
     } catch (error) {
       res.redirect('/login');

@@ -9,14 +9,25 @@ module.exports.list = () => {
             .find()
             .sort('name')
             .then(resposta => {
-                return resposta
+                return resposta._id
             })
             .catch(erro => {
                 return erro
             })
 }
 
-module.exports.getUser = id => {
+module.exports.getIdbyUsername =(username) => {
+    return User.findOne ({username: username})
+            .then(resposta => {
+                return resposta._id
+            })
+            .catch(erro => {
+                return erro
+            })
+}
+
+
+module.exports.getUser = (id) => {
     return User.findOne({_id:id})
             .then(resposta => {
                 return resposta
@@ -68,7 +79,7 @@ module.exports.updateUserPassword = (id, pwd) => {
 };
 
 module.exports.updateToProducer = (username) => {
-    return userModel.findOne({ username: username })
+    return User.findOne({ username: username })
         .then(user => {
             if (!user) {
                 throw new Error('User not found');
