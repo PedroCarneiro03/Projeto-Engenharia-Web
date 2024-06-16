@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const unzipper = require('unzipper');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const { spawn } = require('child_process');
 
 
 const mongoUri="mongodb://mongoDB:27017/projetoEW";
@@ -17,23 +18,35 @@ const uploadPath = './uploads';
 
 // Função para exportar o banco de dados MongoDB
 function exportMongoDB(callback) {
-  const dumpCommand = `docker exec ${mongoContainer} mongodump --uri=${mongoUri} --out /backup/mongo`;
-  exec(dumpCommand, (err, stdout, stderr) => {
-    if (err) {
-      console.error(`Erro ao exportar MongoDB: ${stderr}`);
-      return callback(err);
+  const dumpCommand = `mongodump --uri=${mongoUri} --out ./backup/mongo`;
+
+  const child = spawn(dumpCommand, { shell: true });
+
+  // Captura a saída stdout
+  child.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`);
+  });
+
+  // Captura a saída stderr
+  child.stderr.on('data', (data) => {
+    console.error(`stderr: ${data}`);
+  });
+
+  // Trata eventos de fechamento do processo
+  child.on('close', (code) => {
+    if (code !== 0) {
+      console.error(`Erro ao exportar o banco de dados. Código de saída: ${code}`);
+      callback(new Error(`Erro ao exportar o banco de dados. Código de saída: ${code}`));
+    } else {
+      console.log('Exportação do MongoDB concluída com sucesso.');
+      callback(null); // Chamada de volta sem erros
     }
-    console.log('Exportação do MongoDB concluída.');
-    // Copiar os dados do contêiner para o host
-    const copyCommand = `docker cp ${mongoContainer}:/backup/mongo ./backup/mongo`;
-    exec(copyCommand, (err, stdout, stderr) => {
-      if (err) {
-        console.error(`Erro ao copiar dados do contêiner: ${stderr}`);
-        return callback(err);
-      }
-      console.log('Dados copiados do contêiner.');
-      callback(null);
-    });
+  });
+
+  // Trata erros no processo
+  child.on('error', (err) => {
+    console.error(`Erro ao executar o comando mongodump: ${err.message}`);
+    callback(err);
   });
 }
 
@@ -55,10 +68,11 @@ function zipBackup(outputPath, callback) {
   });
 
   archive.pipe(output);
-  archive.directory('FileStore', 'FileStore');
-  archive.directory('backup/mongo', 'mongo');
+  archive.directory('./FileStore', 'FileStore');
+  archive.directory('./backup/mongo', 'mongo');
   archive.finalize();
 }
+
 
 
 
@@ -80,7 +94,6 @@ router.get('/export', (req, res) => {
     if (err) {
       return res.status(500).send('Erro ao exportar banco de dados');
     }
-
     const zipPath = './backup/full_backup.zip';
     zipBackup(zipPath, (err) => {
       if (err) {
@@ -101,28 +114,6 @@ router.get('/export', (req, res) => {
 
 
 
-// Função para compactar a pasta FileStore e a exportação do MongoDB em um único arquivo ZIP
-function zipBackup(outputPath, callback) {
-  const output = fs.createWriteStream(outputPath);
-  const archive = archiver('zip', {
-    zlib: { level: 9 }
-  });
-
-  output.on('close', () => {
-    console.log(`${archive.pointer()} bytes total foram escritos no arquivo ZIP.`);
-    callback(null);
-  });
-
-  archive.on('error', (err) => {
-    console.error(`Erro ao criar arquivo ZIP: ${err}`);
-    callback(err);
-  });
-
-  archive.pipe(output);
-  archive.directory('FileStore', 'FileStore');
-  archive.directory('backup/mongo', 'mongo');
-  archive.finalize();
-}
 
 
 // Rota para importar dados
@@ -151,47 +142,29 @@ router.post('/import', upload.single('zip'),async (req, res) => {
     fs.renameSync('./uploads/extracted/FileStore', __dirname + "/../FileStore");
 
     // Caminho completo para o diretório 'mongo' dentro do ZIP extraído
-    const mongoBackupPath = __dirname +"/../uploads/extracted/mongo";
+    const mongoBackupPath = __dirname +"/../uploads/extracted/mongo/projetoEW";
 
-    const removeCommand = `docker exec ${mongoContainer} rm -rf /backup`;
-    // Comando para copiar o diretório 'mongo' para dentro do container Docker MongoDB
-    const copyCommand = `docker cp ${mongoBackupPath} ${mongoContainer}:/backup`;
 
-    exec(removeCommand, (removeErr, removeStdout, removeStderr) => {
-      if (removeErr) {
-        console.error(`Erro ao remover diretório antigo no container Docker: ${removeStderr}`);
-        return res.status(500).send('Erro ao remover diretório antigo no container Docker');
+
+    // Comando para restaurar os dados do MongoDB dentro do container Docker
+
+    const restoreCommand = `mongorestore --uri=${mongoUri} --drop ${mongoBackupPath}`;
+
+    // Executar o comando de restauração dentro do container Docker
+    exec(restoreCommand, (restoreErr, restoreStdout, restoreStderr) => {
+      if (restoreErr) {
+        console.error(`Erro ao restaurar MongoDB: ${restoreStderr}`);
+        return res.status(500).send('Erro ao restaurar MongoDB');
       }
-      console.log('Remoção do diretório antigo no container Docker concluída.')
-    
-      // Executar o comando de cópia para dentro do container Docker
-      exec(copyCommand, (copyErr, copyStdout, copyStderr) => {
-        if (copyErr) {
-          console.error(`Erro ao copiar para o container Docker: ${copyStderr}`);
-          return res.status(500).send('Erro ao copiar para o container Docker');
-        }
-        console.log('Cópia para o container Docker concluída.');
+      console.log('Restauração do MongoDB concluída.');
 
-        // Comando para restaurar os dados do MongoDB dentro do container Docker
+      // Remover o arquivo ZIP e diretório temporário de uploads
+      fs.unlinkSync(zipFilePath);
+      fs.rmSync("./uploads/extracted", { recursive: true, force: true });
 
-        const restoreCommand = `docker exec -i ${mongoContainer} mongorestore --uri=${mongoUri} --drop /backup/projetoEW`;
-
-        // Executar o comando de restauração dentro do container Docker
-        exec(restoreCommand, (restoreErr, restoreStdout, restoreStderr) => {
-          if (restoreErr) {
-            console.error(`Erro ao restaurar MongoDB: ${restoreStderr}`);
-            return res.status(500).send('Erro ao restaurar MongoDB');
-          }
-          console.log('Restauração do MongoDB concluída.');
-
-          // Remover o arquivo ZIP e diretório temporário de uploads
-          fs.unlinkSync(zipFilePath);
-          fs.rmSync("./uploads/extracted", { recursive: true, force: true });
-
-          res.send('Importação concluída com sucesso!');
-        });
-      });
-    })
+      res.send('Importação concluída com sucesso!');
+    });
+      
     
   } catch (err) {
     console.error(`Erro durante a importação: ${err}`);

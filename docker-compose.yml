@@ -41,4 +41,3 @@ services:
   mongo:
     container_name: mongoDB
     image: mongo
-    

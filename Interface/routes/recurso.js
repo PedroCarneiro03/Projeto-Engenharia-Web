@@ -135,6 +135,7 @@ router.post('/', upload.array('files'),auth.verificaAcesso, auth.verificaLogado,
     try {
         // Mover os arquivos recebidos para o diretório temporário
         for (const file of files) {
+            
         await fs.move(file.path, path.join(tempDir, file.originalname));
         }
 
