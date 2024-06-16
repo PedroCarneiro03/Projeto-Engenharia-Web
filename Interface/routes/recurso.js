@@ -27,7 +27,7 @@ async function calculateFileHash(filePath) {
 /* GET home recursos page. */
 router.get('/', auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
-    axios.get("http://localhost:29050/recursos")
+    axios.get("http://container-api:29050/recursos")
         .then(resposta=>{
             res.render('visualizarRecursos', { title: 'Gestao de Recursos' ,lista:resposta.data , logado: req.body.logado});
         })
@@ -45,7 +45,7 @@ router.get('/add',auth.verificaAcesso, auth.verificaLogado, function(req, res, n
 
 router.get("/download/tudo/:autor/:id", auth.verificaAcesso, auth.verificaLogado,function(req,res,next){
        
-        axios.get(`http://localhost:29050/recursos/download/${req.params.autor}/${req.params.id}`,{responseType: 'arraybuffer'})
+        axios.get(`http://container-api:29050/recursos/download/${req.params.autor}/${req.params.id}`,{responseType: 'arraybuffer'})
         .then(resposta=> {
              // Define o caminho do arquivo zip
             const filePath = __dirname + "/../downloads/" + req.params.id + ".zip";
@@ -69,7 +69,7 @@ router.get('/download/:autor/:id/:fname', function(req, res, next) {
 
 router.get('/:id',auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
-    axios.get("http://localhost:29050/recursos/" + req.params.id)
+    axios.get("http://container-api:29050/recursos/" + req.params.id)
         .then(resposta=>{
             /*
             console.log(resposta.data)
@@ -177,7 +177,7 @@ router.post('/', upload.array('files'),auth.verificaAcesso, auth.verificaLogado,
                 console.log(key, value);
                 formData.append(key, value);
             }
-            await axios.post("http://localhost:29050/recursos",formData,{
+            await axios.post("http://container-api:29050/recursos",formData,{
                 headers: {
                 ...formData.getHeaders() // Adicionar os headers do FormData
                 }
@@ -189,7 +189,7 @@ router.post('/', upload.array('files'),auth.verificaAcesso, auth.verificaLogado,
             if (authHeader) {
                 console.log('Token:', authHeader.split(' ')[1]);
                 const token = authHeader.split(' ')[1];
-                await axios.put("http://localhost:29052/auth/produtor",
+                await axios.put("http://container-authentication:29052/auth/produtor",
                     { username: req.body.autor },
                     {
                         headers: {
@@ -234,7 +234,7 @@ router.post('/', upload.array('files'),auth.verificaAcesso, auth.verificaLogado,
 
 //avaliar um recurso
 router.post("/avaliar/:id",auth.verificaAcesso, auth.verificaLogado,function(req,res,next){
-    axios.get("http://localhost:29050/recursos/" + req.params.id)
+    axios.get("http://container-api:29050/recursos/" + req.params.id)
     .then(resposta=>{
         //verificar que o user ja avaliou
         if(resposta!=null){
@@ -257,7 +257,7 @@ router.post("/avaliar/:id",auth.verificaAcesso, auth.verificaLogado,function(req
                 resposta.data["avaliacoes"].push(avaliacao)
             }
             console.log(resposta.data)
-            axios.put("http://localhost:29050/recursos/avaliar/" + req.params.id,resposta.data)
+            axios.put("http://container-api:29050/recursos/avaliar/" + req.params.id,resposta.data)
             .then(response=>{
                 //res.render('recurso', { title: 'Recurso ' + req.params.id ,item:response.data});
                 res.redirect("/recursos/"+req.params.id)

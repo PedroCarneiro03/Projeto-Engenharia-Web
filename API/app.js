@@ -10,7 +10,7 @@ var postsRouter =  require('./routes/post');
 //Conexao a base de dados
 var mongoose = require('mongoose')
 
-var mongoDB = 'mongodb://127.0.0.1:27017/projetoEW'
+var mongoDB = 'mongodb://mongoDB:27017/projetoEW'
 mongoose.connect(mongoDB)
 var db = mongoose.connection
 db.on('error', console.error.bind(console, 'Erro de conexão ao MongoDB'))

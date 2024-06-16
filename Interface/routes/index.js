@@ -25,7 +25,7 @@ router.post('/registar', auth.verificaLogado, function(req, res, next) {
     return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: true, failRegisto: false, failUser: false, logado: req.body.logado});
   } else {
     // Chamar a página de sucesso
-    axios.post('http://localhost:29052/auth/register', req.body)
+    axios.post('http://container-authentication:29052/auth/register', req.body)
       .then(dados => {
         if (dados.data.error) {
           return res.render('paginaRegisto', { title: "Pagina Registo", failVazio: false, failRegisto: false, failUser: true, logado: req.body.logado});
@@ -58,7 +58,7 @@ router.post('/login', auth.verificaLogado, function(req, res, next) {
     res.render('paginaLogin',{title:"Pagina Login", failVazio: true, failLogin: false , logado: req.body.logado});
   } else {
     // Chamar a página de sucesso
-    axios.post('http://localhost:29052/auth/login', req.body)
+    axios.post('http://container-authentication:29052/auth/login', req.body)
       .then(dados => {
         res.cookie("token",dados.data.token)
         res.render('loginCompleto',{title:"Login Completo!", dados: req.body, logado: true})

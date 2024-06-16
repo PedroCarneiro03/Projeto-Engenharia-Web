@@ -9,7 +9,7 @@ var auth = require("../auth/auth")
 /* GET home page. */
 router.get('/', auth.verificaAcesso, auth.verificaLogado ,function(req, res, next) {
   console.log(req.body)
-  axios.get("http://localhost:29050/posts")
+  axios.get("http://container-api:29050/posts")
     .then(resposta=>{
       
       res.render('visualizarPosts', { title: 'Gestao de posts Home Page' ,lista:resposta.data, logado: req.body.logado});
@@ -29,7 +29,7 @@ router.get('/add',auth.verificaAcesso, auth.verificaLogado, function(req, res, n
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 router.get('/like/:id',auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
-    axios.get("http://localhost:29050/posts/" + req.params.id)
+    axios.get("http://container-api:29050/posts/" + req.params.id)
       .then(resposta=>{
         
         console.log(resposta.data)
@@ -46,7 +46,7 @@ router.get('/like/:id',auth.verificaAcesso, auth.verificaLogado, function(req, r
           resposta.data["likes"].push(username);
         }
 
-        axios.put("http://localhost:29050/posts/"+req.params.id,resposta.data)
+        axios.put("http://container-api:29050/posts/"+req.params.id,resposta.data)
         .then(response=>{
             // Verificar se dei like
             let deilike = false
@@ -78,7 +78,7 @@ router.get('/like/:id',auth.verificaAcesso, auth.verificaLogado, function(req, r
 
   router.get('/:id', auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
-    axios.get("http://localhost:29050/posts/" + req.params.id)
+    axios.get("http://container-api:29050/posts/" + req.params.id)
       .then(resposta=>{
         res.render('post', { title: 'Post ' + req.params.id ,item:resposta.data , logado: req.body.logado});
       })
@@ -107,7 +107,7 @@ router.post('/add', auth.verificaAcesso, auth.verificaLogado, function(req, res,
   }
 
   // Verificar se o recurso existe na base de dados
-  axios.get("http://localhost:29050/recursos/" + recurso)
+  axios.get("http://container-api:29050/recursos/" + recurso)
       .then(resposta => {
 
         // RECURSO NAO EXISTE
@@ -117,7 +117,7 @@ router.post('/add', auth.verificaAcesso, auth.verificaLogado, function(req, res,
         
         else {
           // Chamar a página de sucesso (Enviar post para a API)
-          axios.post('http://localhost:29050/posts', postData)
+          axios.post('http://container-api:29050/posts', postData)
           .then(dados => res.render('addPostSucesso'), {logado: req.body.logado})
           .catch(e => res.status(500).jsonp({error: e}))
         }
@@ -131,7 +131,7 @@ router.post('/add', auth.verificaAcesso, auth.verificaLogado, function(req, res,
   router.post('/comentario/:id', upload.none(),auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
     console.log(req.body)
-    axios.get("http://localhost:29050/posts/" + req.params.id)
+    axios.get("http://container-api:29050/posts/" + req.params.id)
       .then(resposta=>{
         const currentDate = new Date();
 
@@ -153,7 +153,7 @@ router.post('/add', auth.verificaAcesso, auth.verificaLogado, function(req, res,
             data: dateTimeString
         } 
         resposta.data["comentarios"].push(comentario)
-        axios.put("http://localhost:29050/posts/"+req.params.id,resposta.data)
+        axios.put("http://container-api:29050/posts/"+req.params.id,resposta.data)
         .then(response=>{
             res.render('post', { title: 'Post ' + req.params.id ,item:response.data, logado: req.body.logado});
         })

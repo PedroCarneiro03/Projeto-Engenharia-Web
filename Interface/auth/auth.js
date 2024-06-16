@@ -4,7 +4,7 @@ async function verificaAcesso(req, res, next) {
   if (req.cookies && req.cookies.token) {
     try {
       // Verify token with the authentication service
-      const response = await axios.get('http://localhost:29052/auth/verify', {
+      const response = await axios.get('http://container-authentication:29052/auth/verify', {
         headers: { Authorization: `Bearer ${req.cookies.token}` }
       });
       req.body["user"]=response.data.user

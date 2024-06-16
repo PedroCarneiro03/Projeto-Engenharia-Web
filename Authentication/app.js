@@ -12,7 +12,7 @@ var createError = require('http-errors');
 
 
 
-var mongoDB = 'mongodb://127.0.0.1:27017/projetoEW'
+var mongoDB = 'mongodb://mongoDB:27017/projetoEW'
 mongoose.connect(mongoDB, 
   { serverSelectionTimeoutMS: 5000})
 

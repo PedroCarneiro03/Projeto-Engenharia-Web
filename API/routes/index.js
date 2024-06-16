@@ -10,8 +10,8 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 
-const mongoUri="mongodb://127.0.0.1:27017/projetoEW";
-const mongoContainer="mongoEW"
+const mongoUri="mongodb://mongoDB:27017/projetoEW";
+const mongoContainer="mongoDB"
 const uploadPath = './uploads';
 
 
