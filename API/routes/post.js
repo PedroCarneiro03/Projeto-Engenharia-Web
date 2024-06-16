@@ -11,12 +11,26 @@ router.get('/', function(req, res) {
         .catch(erro => res.jsonp(erro))
 });
 
+/* Trending POST (R) */
+router.get('/trending', function(req, res) {
+    POST.trendingPosts()
+        .then(data => res.jsonp(data))
+        .catch(erro => res.jsonp(erro))
+});
+
+/* Recent POST (R) */
+router.get('/recent', function(req, res) {
+POST.recentAdded()
+    .then(data => res.jsonp(data))
+    .catch(erro => res.jsonp(erro))
+});
+
 /* Consultar um0 POST (R) */
 router.get('/:id', function(req, res) {
     POST.findById(req.params.id)
         .then(data => res.jsonp(data))
         .catch(erro => res.jsonp(erro))
-    });
+});
 
 /* Criar um POST (C) */
 router.post('/', function(req, res) {

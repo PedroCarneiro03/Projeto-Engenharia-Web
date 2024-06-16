@@ -29,6 +29,14 @@ router.get('/', function(req, res) {
         .catch(erro => res.jsonp(erro))
 });
 
+/* Listar os melhores Recursos (R) */
+router.get('/best', function(req, res) {
+    Recurso.bestResources()
+        .then(data => res.jsonp(data))
+        .catch(erro => res.jsonp(erro))
+});
+
+
 //Download aos ficheiros todos
 router.get("/download/:autor/:id",async function(req,res){
     

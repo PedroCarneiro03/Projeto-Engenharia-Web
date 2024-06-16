@@ -34,3 +34,36 @@ module.exports.remove = id => {
         .deleteOne()
         .exec()
 }
+
+module.exports.bestResources = async () => {
+    try {
+        const resources = await RECURSO.aggregate([
+            {
+                $unwind: "$avaliacoes"
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    tipo: { $first: "$tipo" },
+                    titulo: { $first: "$titulo" },
+                    subtitulo: { $first: "$subtitulo" },
+                    dataCriacao: { $first: "$dataCriacao" },
+                    dataRegisto: { $first: "$dataRegisto" },
+                    visibilidade: { $first: "$visibilidade" },
+                    autor: { $first: "$autor" },
+                    ficheiro: { $first: "$ficheiro" },
+                    avgRating: { $avg: "$avaliacoes.rating" }
+                }
+            },
+            {
+                $sort: { avgRating: -1 }
+            },
+            {
+                $limit: 5
+            }
+        ]);
+        return resources;
+    } catch (err) {
+        throw err;
+    }
+};
