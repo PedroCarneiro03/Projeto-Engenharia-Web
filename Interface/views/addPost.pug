@@ -19,17 +19,24 @@ block content
                 h1.regular Adicionar post
                 label Descrição
                 input.w3-input(type="text" name="descricao")
-                label Recurso
-                input.w3-input(type="text" name="recurso")
 
-                if(failvazio)
-                    p(style='color:red') Preencher todos os campos!
-                
-                if(failrecurso)
-                    p(style='color:red') Recurso não existe!
-                
-                button.w3-btn.w3-green.w3-mb-2.tmargin20.rmargin15(type='submit') Adicionar post
-                a.w3-button.w3-black.tmargin20(href="/posts") Regressar
+                div.coluna
+                    div
+                        label.rmargin15 Recurso
+                        select.tmargin15(name="recurso" id="recurso")
+                            each item in recursos
+                                if(item.autor == utilizador && item.visibilidade == "publico")
+                                    option(value=item._id) #{item.titulo}
+                    
+                    div
+                        if(failvazio)
+                            p(style='color:red') Preencher todos os campos!
+                        
+                        if(failrecurso)
+                            p(style='color:red') Recurso não existe!
+                        
+                        button.w3-btn.w3-green.w3-mb-2.tmargin20.rmargin15(type='submit') Adicionar post
+                        a.w3-button.w3-black.tmargin20(href="/posts") Regressar
         
     // Footer
     include componentes/rodape

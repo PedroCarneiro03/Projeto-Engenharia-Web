@@ -229,3 +229,45 @@ footer {
 .tmargin15{margin-top: 15px;}
 .bmargin20{margin-bottom: 20px;}
 .bmargin15{margin-bottom: 15px;}
+
+/*----------------------------------------------------- ESTILO PARA A PAGINA INICIAL -----------------------------------------------------*/
+.caixa-destaques {
+  display: flex; 
+  justify-content: space-between; 
+  padding: 10px;
+}
+
+.destaque-seccao{
+  flex: 1; 
+  margin: 0 10px;
+  border-radius: 5px; 
+  padding: 20px;
+}
+
+.destaque{
+  border-radius: 5px; 
+  padding: 10px;
+  border: 1px solid #000;
+  margin-bottom: 10px;
+}
+
+.destaque-titulo{
+  font-size: 1.5rem; 
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.centrado{
+  display: flex; 
+  justify-content: center;
+}
+
+.navbar{
+  position: static;
+  overflow: visible;
+}
+
+.coluna{
+  display: flex;
+  flex-direction: column;
+}

@@ -23,8 +23,16 @@ router.get('/', auth.verificaAcesso, auth.verificaLogado ,function(req, res, nex
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* GET add post */
 router.get('/add',auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
-  res.render('addPost', { title: 'Página de adição de posts', logado: req.body.logado});
-});
+  // Obter recursos para poder ser visualizado no dropdown
+  axios.get("http://container-api:29050/recursos")
+    .then(resposta=>{
+      res.render('addPost', { title: 'Página de adição de posts', logado: req.body.logado, recursos: resposta.data, utilizador: req.body.user["username"]});
+    })
+    .catch(erro=>{
+      res.render("error",{error: erro, message:"Erro ao recuperar os recursos"})
+    })
+  }
+);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 router.get('/like/:id',auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {

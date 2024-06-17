@@ -2,19 +2,100 @@ var express = require('express');
 var axios = require('axios');
 var router = express.Router();
 var auth = require("../auth/auth")
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+var fs = require('fs-extra')
+const FormData = require('form-data');
 
-/* GET home page. */
-router.get('/', auth.verificaLogado ,function(req, res, next) {
-  axios.get('http://container-api:29050/posts/trending', {headers: {cookie: req.headers.cookie}})
-    .then(resposta=>{
-      console.log("OLAAAAAAAAAAAAAA" + resposta.data)
-      res.render('paginaPrincipal',{title:"Plataforma de Gestão e Disponibilização de Recursos Educativos", logado: req.body.logado, posts: resposta.data});
+// pagina principal
+router.get('/', auth.verificaLogado, function(req, res, next) {
+  ///////////////////// Obter os posts em trending /////////////////////
+  axios.get('http://container-api:29050/posts/trending', { headers: { cookie: req.headers.cookie } })
+    .then(trendingRes => {
+      ///////////////////// Obter os posts em recent /////////////////////
+      axios.get('http://container-api:29050/posts/recent', { headers: { cookie: req.headers.cookie } })
+        .then(recentRes => {
+          ///////////////////// Obter os melhores recursos  /////////////////////
+          axios.get('http://container-api:29050/recursos/best', { headers: { cookie: req.headers.cookie } })
+            .then(bestRes => {
+              res.render('paginaPrincipal', {
+                title: "Plataforma de Gestão e Disponibilização de Recursos Educativos",
+                logado: req.body.logado,
+                trending: trendingRes.data,
+                recent: recentRes.data,
+                best: bestRes.data
+              });
+            })
+            .catch(erro => {
+              res.render("error", { error: erro, message: "Erro ao recuperar melhores recursos" });
+            });
+        })
+        .catch(erro => {
+          res.render("error", { error: erro, message: "Erro ao recuperar recent" });
+        });
     })
-    .catch(erro=>{
-      res.render("error",{error: erro, message:"Erro ao recuperar os posts"})
+    .catch(erro => {
+      res.render("error", { error: erro, message: "Erro ao recuperar trending" });
+    });
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//IMPORTAR E EXPORTAR
+
+router.get('/exportar', auth.verificaAcesso, function(req, res, next) {
+  if(req.body.user["level"]=="administrador"){
+    axios({
+      method: 'get',
+      url: 'http://container-api:29050/export',
+      responseType: 'stream'
     })
+    .then(response => {
+      res.setHeader('Content-Disposition', 'attachment; filename=full_backup.zip');
+      response.data.pipe(res);
+    })
+    .catch(error => {
+      res.render("error", {error: error, message:"Erro ao exportar"});
+    });
   }
-);
+  else{
+    res.redirect("/")
+  }
+});
+
+router.get("/importar",auth.verificaAcesso,auth.verificaLogado,function(req, res, next) {
+  if(req.body.user["level"]=="administrador"){
+    res.render("importar",{title:"Pagina para importar ficheiros", logado: req.body.logado})
+  }
+  else{
+    res.redirect("/")
+  }
+})
+
+router.post("/importar",upload.single('zip'),function(req, res, next) {
+  const filePath = __dirname+  "/../" +  req.file.path;
+
+  // Cria um form data para enviar o arquivo
+  const formData = new FormData();
+  formData.append('zip', fs.createReadStream(filePath));
+
+  // Chama a API com o arquivo
+  axios.post('http://container-api:29050/import', formData, {
+    headers: {
+      ...formData.getHeaders()
+    }
+  })
+  .then(response => {
+    // Limpa o arquivo depois do upload
+    fs.unlinkSync(filePath);
+    return res.redirect("/")
+  })
+  .catch(error => {
+    fs.unlinkSync(filePath);
+    return res.render("error", {error: error, message:"Erro ao importar"});
+  });
+
+
+})
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* GET pag registo. */
