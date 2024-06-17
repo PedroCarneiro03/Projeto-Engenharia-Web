@@ -79,8 +79,18 @@ router.get('/like/:id',auth.verificaAcesso, auth.verificaLogado, function(req, r
   router.get('/:id', auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
 
     axios.get("http://container-api:29050/posts/" + req.params.id)
-      .then(resposta=>{
-        res.render('post', { title: 'Post ' + req.params.id ,item:resposta.data , logado: req.body.logado});
+        .then(response=>{
+          // Verificar se dei like
+          const username = req.body.user["username"];
+          let deilike = false
+          for (let i = 0; i < response.data["likes"].length; i++) {
+            if (response.data["likes"][i] == username) {
+              deilike = true
+              break
+            }
+          }
+
+          res.render('post', { title: 'Post ' + req.params.id ,item:response.data, logado: req.body.logado, deilike: deilike});
       })
       .catch(erro=>{
         res.render("error",{error: erro, message:"Erro ao recuperar o post"})
@@ -129,7 +139,7 @@ router.post('/add', auth.verificaAcesso, auth.verificaLogado, function(req, res,
 });
 
   router.post('/comentario/:id', upload.none(),auth.verificaAcesso, auth.verificaLogado, function(req, res, next) {
-
+    const username = req.body.user["username"];
     console.log(req.body)
     axios.get("http://container-api:29050/posts/" + req.params.id)
       .then(resposta=>{
@@ -155,7 +165,16 @@ router.post('/add', auth.verificaAcesso, auth.verificaLogado, function(req, res,
         resposta.data["comentarios"].push(comentario)
         axios.put("http://container-api:29050/posts/"+req.params.id,resposta.data)
         .then(response=>{
-            res.render('post', { title: 'Post ' + req.params.id ,item:response.data, logado: req.body.logado});
+            // Verificar se dei like
+            let deilike = false
+            for (let i = 0; i < response.data["likes"].length; i++) {
+              if (response.data["likes"][i] == username) {
+                deilike = true
+                break
+              }
+            }
+
+            res.render('post', { title: 'Post ' + req.params.id ,item:response.data, logado: req.body.logado, deilike: deilike});
         })
         .catch(erro=>{
             res.render("error",{error: erro, message:"Erro ao atualizar o post"})

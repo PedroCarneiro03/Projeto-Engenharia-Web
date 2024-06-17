@@ -31,18 +31,20 @@ block content
                         th Subtitulo
                         th Data de Criacao
                         th Data de Registo
+                        th Acesso
                         th Autor
 
                     each item in lista
-                        tr
-                            td
-                                a(href="/recursos/"+item._id) #{item._id}
-                            td=item.tipo
-                            td=item.titulo
-                            td=item.subtitulo
-                            td=item.dataCriacao
-                            td=item.dataRegisto
-                            td=item.autor
-
+                        if(item.visibilidade=="publico" || item.visibilidade=="privado" && (acesso=="admin" || item.autor==utilizador))
+                            tr
+                                td
+                                    a(href="/recursos/"+item._id) #{item._id}
+                                td=item.tipo
+                                td=item.titulo
+                                td=item.subtitulo
+                                td=item.dataCriacao
+                                td=item.dataRegisto
+                                td=item.visibilidade
+                                td=item.autor
     // Footer
     include componentes/rodape

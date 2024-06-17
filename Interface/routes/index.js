@@ -5,8 +5,16 @@ var auth = require("../auth/auth")
 
 /* GET home page. */
 router.get('/', auth.verificaLogado ,function(req, res, next) {
-  res.render('paginaPrincipal',{title:"Plataforma de Gestão e Disponibilização de Recursos Educativos", logado: req.body.logado});
-});
+  axios.get('http://container-api:29050/posts/trending', {headers: {cookie: req.headers.cookie}})
+    .then(resposta=>{
+      console.log("OLAAAAAAAAAAAAAA" + resposta.data)
+      res.render('paginaPrincipal',{title:"Plataforma de Gestão e Disponibilização de Recursos Educativos", logado: req.body.logado, posts: resposta.data});
+    })
+    .catch(erro=>{
+      res.render("error",{error: erro, message:"Erro ao recuperar os posts"})
+    })
+  }
+);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* GET pag registo. */

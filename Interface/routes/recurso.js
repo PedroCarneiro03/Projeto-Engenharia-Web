@@ -29,7 +29,7 @@ router.get('/', auth.verificaAcesso, auth.verificaLogado, function(req, res, nex
 
     axios.get("http://container-api:29050/recursos")
         .then(resposta=>{
-            res.render('visualizarRecursos', { title: 'Gestao de Recursos' ,lista:resposta.data , logado: req.body.logado});
+            res.render('visualizarRecursos', { title: 'Gestao de Recursos' ,lista:resposta.data , logado: req.body.logado, acesso: req.body.user["level"], utilizador: req.body.user["username"]});
         })
         .catch(erro=>{
             res.render("error",{error: erro, message:"Erro ao recuperar os recursos"})
