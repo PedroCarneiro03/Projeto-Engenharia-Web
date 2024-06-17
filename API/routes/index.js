@@ -127,7 +127,9 @@ router.post('/import', upload.single('zip'),async (req, res) => {
     if (!req.files === 0) {
       return res.status(400).send('Nenhum arquivo enviado.');
     }
-    fs.rmSync("./FileStore", { recursive: true, force: true });
+    if (fs.existsSync("./FileStore")) {
+       fs.rmSync("./FileStore", { recursive: true, force: true });
+    }
     // Salvar o arquivo no diretório de uploads
     const zipFilePath = __dirname + "/../uploads/"+ req.file.filename //path.join(uploadPath, uploadedFile.filename);
     //console.log("aqui")
@@ -139,8 +141,9 @@ router.post('/import', upload.single('zip'),async (req, res) => {
       .promise();
     // Copiar a pasta FileStore para o destino desejado na API
     
-    fs.renameSync('./uploads/extracted/FileStore', __dirname + "/../FileStore");
-
+    if (fs.existsSync('./uploads/extracted/FileStore')) { 
+      fs.renameSync('./uploads/extracted/FileStore', __dirname + "/../FileStore");
+    }
     // Caminho completo para o diretório 'mongo' dentro do ZIP extraído
     const mongoBackupPath = __dirname +"/../uploads/extracted/mongo/projetoEW";
 
